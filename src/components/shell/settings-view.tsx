@@ -224,7 +224,7 @@ function NotificationPreferences() {
 
   React.useEffect(() => {
     try {
-      const stored = localStorage.getItem("skillbridge.notifications");
+      const stored = localStorage.getItem("lincode.notifications");
       if (stored) setPrefs((prev) => ({ ...prev, ...JSON.parse(stored) }));
     } catch {
       // Storage can be unavailable (private mode); defaults are fine.
@@ -235,7 +235,7 @@ function NotificationPreferences() {
     setPrefs((prev) => {
       const next = { ...prev, [key]: !prev[key] };
       try {
-        localStorage.setItem("skillbridge.notifications", JSON.stringify(next));
+        localStorage.setItem("lincode.notifications", JSON.stringify(next));
       } catch {
         // Ignore: the toggle still applies for this session.
       }

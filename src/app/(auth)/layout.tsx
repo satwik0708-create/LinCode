@@ -19,7 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div aria-hidden className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_20%_20%,white,transparent_45%),radial-gradient(circle_at_80%_60%,white,transparent_40%)]" />
         <Link href="/" className="relative flex items-center gap-2.5">
           <LogoMark className="bg-white/15 shadow-none backdrop-blur" />
-          <span className="text-lg font-semibold tracking-tight">SkillBridge</span>
+          <span className="text-lg font-semibold tracking-tight">LinCode</span>
         </Link>
 
         <div className="relative max-w-md">
@@ -45,7 +45,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="flex items-center justify-between p-4 sm:p-6">
           <Link href="/" className="flex items-center gap-2 lg:invisible">
             <LogoMark />
-            <span className="text-sm font-semibold">SkillBridge</span>
+            <span className="text-sm font-semibold">LinCode</span>
           </Link>
           <ThemeToggle />
         </div>

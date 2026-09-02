@@ -78,7 +78,7 @@ export function HeroSection() {
                   as="p"
                   className="mx-auto mt-6 max-w-2xl text-balance text-base text-muted-foreground sm:text-lg"
                 >
-                  SkillBridge assesses what you actually know, shows you the gap against real industry demand, builds the learning path that closes it — then connects you to the internships and jobs you are ready for.
+                  LinCode assesses what you actually know, shows you the gap against real industry demand, builds the learning path that closes it — then connects you to the internships and jobs you are ready for.
                 </TextEffect>
 
                 <AnimatedGroup
@@ -134,7 +134,7 @@ export function HeroSection() {
                     <span className="size-2.5 rounded-full bg-destructive/50" />
                     <span className="size-2.5 rounded-full bg-warning/50" />
                     <span className="size-2.5 rounded-full bg-success/50" />
-                    <span className="ml-3 truncate text-xs text-muted-foreground">skillbridge.app / student / dashboard</span>
+                    <span className="ml-3 truncate text-xs text-muted-foreground">lincode.app / student / dashboard</span>
                   </div>
                   {/* The gradient sits beneath the photo, so a slow or blocked
                       image degrades into a designed panel rather than a broken frame. */}
@@ -204,9 +204,9 @@ export function HeroHeader() {
         >
           <div className="flex flex-wrap items-center justify-between gap-4 py-3 lg:gap-0 lg:py-4">
             <div className="flex w-full items-center justify-between gap-8 lg:w-auto">
-              <Link href="/" aria-label="SkillBridge home" className="flex items-center gap-2">
+              <Link href="/" aria-label="LinCode home" className="flex items-center gap-2">
                 <LogoMark />
-                <span className="text-base font-semibold tracking-tight">SkillBridge</span>
+                <span className="text-base font-semibold tracking-tight">LinCode</span>
               </Link>
 
               <button
@@ -293,9 +293,9 @@ export function LogoMark({ className }: { className?: string }) {
       aria-hidden
     >
       <svg viewBox="0 0 24 24" fill="none" className="size-4.5 h-[18px] w-[18px]">
-        <path d="M4 17V9.5L12 5l8 4.5V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8 13h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M12 19v-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M9.3 8.4 5.7 12l3.6 3.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14.7 8.4 18.3 12l-3.6 3.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M12 7.2v9.6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
     </span>
   );

@@ -13,7 +13,7 @@ import type { Role } from "@/lib/types";
  * a session before a request ever reaches a route handler.
  */
 
-export const SESSION_COOKIE = "sb_session";
+export const SESSION_COOKIE = "lc_session";
 const DEFAULT_TTL_SECONDS = 60 * 60 * 8; // 8h
 const REMEMBERED_TTL_SECONDS = 60 * 60 * 24 * 30; // 30d
 
@@ -33,7 +33,7 @@ function secret(): Uint8Array {
       throw new Error("SESSION_SECRET must be set to at least 32 characters in production.");
     }
     // Development fallback only — never used when NODE_ENV=production.
-    return new TextEncoder().encode("skillbridge-development-only-secret-key-please-set-SESSION_SECRET");
+    return new TextEncoder().encode("lincode-development-only-secret-key-please-set-SESSION_SECRET");
   }
   return new TextEncoder().encode(value);
 }
@@ -49,8 +49,8 @@ export async function createSessionToken(
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt()
-    .setIssuer("skillbridge")
-    .setAudience("skillbridge-app")
+    .setIssuer("lincode")
+    .setAudience("lincode-app")
     .setExpirationTime(`${ttlSeconds}s`)
     .sign(secret());
 }
@@ -59,8 +59,8 @@ export async function verifySessionToken(token: string | undefined): Promise<Ses
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret(), {
-      issuer: "skillbridge",
-      audience: "skillbridge-app",
+      issuer: "lincode",
+      audience: "lincode-app",
       algorithms: ["HS256"],
     });
     if (typeof payload.sub !== "string") return null;

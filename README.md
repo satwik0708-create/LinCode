@@ -1,4 +1,4 @@
-# SkillBridge
+# LinCode
 
 A role-based platform covering the full lifecycle from skill assessment to placement:
 

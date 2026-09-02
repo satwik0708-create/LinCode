@@ -254,7 +254,7 @@ export function LoginForm() {
       )}
 
       <p className="text-center text-sm text-muted-foreground">
-        New to SkillBridge?{" "}
+        New to LinCode?{" "}
         <Link href="/signup" className="font-medium text-primary hover:underline">Create an account</Link>
       </p>
 

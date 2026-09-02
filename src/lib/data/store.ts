@@ -77,8 +77,8 @@ type Cache = {
 
 // Next.js reloads modules in dev; hang the cache off globalThis so the store
 // survives hot reloads instead of resetting mid-session.
-const globalStore = globalThis as unknown as { __skillbridgeStore?: Cache };
-const cache: Cache = (globalStore.__skillbridgeStore ??= { db: null, loading: null, queue: Promise.resolve() });
+const globalStore = globalThis as unknown as { __lincodeStore?: Cache };
+const cache: Cache = (globalStore.__lincodeStore ??= { db: null, loading: null, queue: Promise.resolve() });
 
 async function loadFromDisk(): Promise<Database> {
   try {

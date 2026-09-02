@@ -18,8 +18,8 @@ interface Challenge {
   subject: string;
 }
 
-const globalChallenges = globalThis as unknown as { __sbChallenges?: Map<string, Challenge> };
-const store: Map<string, Challenge> = (globalChallenges.__sbChallenges ??= new Map());
+const globalChallenges = globalThis as unknown as { __lincodeChallenges?: Map<string, Challenge> };
+const store: Map<string, Challenge> = (globalChallenges.__lincodeChallenges ??= new Map());
 
 const OTP_TTL_MS = 5 * 60_000;
 const RESET_TTL_MS = 30 * 60_000;
@@ -40,7 +40,7 @@ export function issueOtp(mobile: string): string {
   store.set(`otp:${mobile}`, { hash: hash(code), expiresAt: Date.now() + OTP_TTL_MS, attempts: 0, subject: mobile });
 
   // Stands in for the SMS gateway. The code is never returned to the client.
-  console.info(`[skillbridge][otp] code for ${mobile}: ${code} (valid ${OTP_TTL_MS / 60_000} minutes)`);
+  console.info(`[lincode][otp] code for ${mobile}: ${code} (valid ${OTP_TTL_MS / 60_000} minutes)`);
   return code;
 }
 
@@ -71,7 +71,7 @@ export function issueResetToken(userId: string): string {
   });
 
   // Stands in for the transactional email. Never surfaced in an HTTP response.
-  console.info(`[skillbridge][reset] token for ${userId}: ${token} (valid ${RESET_TTL_MS / 60_000} minutes)`);
+  console.info(`[lincode][reset] token for ${userId}: ${token} (valid ${RESET_TTL_MS / 60_000} minutes)`);
   return token;
 }
 

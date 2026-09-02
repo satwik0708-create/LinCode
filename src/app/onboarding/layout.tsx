@@ -15,7 +15,7 @@ export default async function OnboardingLayout({ children }: { children: React.R
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link href="/" className="flex items-center gap-2">
             <LogoMark />
-            <span className="text-sm font-semibold">SkillBridge</span>
+            <span className="text-sm font-semibold">LinCode</span>
           </Link>
           <div className="flex items-center gap-2">
             <span className="hidden text-sm text-muted-foreground sm:inline">{user.name}</span>

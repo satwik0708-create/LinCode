@@ -23,7 +23,7 @@ export function fail(message: string, status = 400, extra?: Record<string, unkno
 
 /** Never echo internals to the client; log the detail server-side instead. */
 export function serverError(context: string, error: unknown) {
-  console.error(`[skillbridge] ${context}:`, error);
+  console.error(`[lincode] ${context}:`, error);
   return fail("Something went wrong. Please try again.", 500);
 }
 

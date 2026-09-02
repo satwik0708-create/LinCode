@@ -20,8 +20,8 @@ export const FONT_SCALES: Record<FontScale, { label: string; value: number; hint
   xl: { label: "Extra large", value: 1.25, hint: "Maximum readability" },
 };
 
-export const THEME_KEY = "skillbridge.theme";
-export const SCALE_KEY = "skillbridge.fontScale";
+export const THEME_KEY = "lincode.theme";
+export const SCALE_KEY = "lincode.fontScale";
 
 interface PreferencesValue {
   theme: Theme;

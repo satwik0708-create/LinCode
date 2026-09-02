@@ -4,12 +4,12 @@ import { PreferencesProvider, PREFERENCES_BOOTSTRAP_SCRIPT } from "@/components/
 
 export const metadata: Metadata = {
   title: {
-    default: "SkillBridge — skills, internships and placements on one platform",
-    template: "%s · SkillBridge",
+    default: "LinCode — skills, internships and placements on one platform",
+    template: "%s · LinCode",
   },
   description:
     "Assess your skills, see the gap against real industry demand, follow a personalised learning path, and connect to the internships and jobs you are ready for.",
-  applicationName: "SkillBridge",
+  applicationName: "LinCode",
   robots: { index: true, follow: true },
 };
 
