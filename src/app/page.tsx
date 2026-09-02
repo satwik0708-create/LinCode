@@ -53,7 +53,7 @@ export default function LandingPage() {
               Every step from &ldquo;what am I missing?&rdquo; to &ldquo;I&rsquo;m placement ready&rdquo;
             </h2>
             <p className="mt-4 text-balance text-muted-foreground">
-              Most platforms hand you a course catalogue. SkillBridge works out what you already know first, and everything downstream follows from that.
+              Most platforms hand you a course catalogue. LinCode works out what you already know first, and everything downstream follows from that.
             </p>
           </div>
 
@@ -195,7 +195,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <div className="flex items-center gap-2">
             <LogoMark />
-            <span className="text-sm font-semibold">SkillBridge</span>
+            <span className="text-sm font-semibold">LinCode</span>
           </div>
           <p className="text-sm text-muted-foreground">
             Skill development, internships and placements — built for Smart India Hackathon.

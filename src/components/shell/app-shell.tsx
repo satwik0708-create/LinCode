@@ -59,7 +59,7 @@ export function AppShell({
         <div className="flex h-16 items-center gap-2 border-b px-5">
           <LogoMark />
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold leading-tight">SkillBridge</p>
+            <p className="truncate text-sm font-semibold leading-tight">LinCode</p>
             <p className="truncate text-[11px] text-muted-foreground">{workspaceLabel}</p>
           </div>
         </div>
@@ -82,7 +82,7 @@ export function AppShell({
               <div className="flex items-center gap-2">
                 <LogoMark />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold leading-tight">SkillBridge</p>
+                  <p className="truncate text-sm font-semibold leading-tight">LinCode</p>
                   <p className="truncate text-[11px] text-muted-foreground">{workspaceLabel}</p>
                 </div>
               </div>

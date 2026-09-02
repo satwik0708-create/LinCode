@@ -90,7 +90,7 @@ export async function buildSeedDatabase(): Promise<Database> {
   const recruiter3 = mk("usr_recruiter3", "Meera Nair", "recruiter@vertex.demo", "+919812345022", ["industry"], "industry", { organizationId: "org_vertex" });
   const recruiter4 = mk("usr_recruiter4", "Vikram Rao", "recruiter@finlytic.demo", "+919812345023", ["industry"], "industry", { organizationId: "org_finlytic" });
   const cdc = mk("usr_cdc", "Anita Deshpande", "cdc@demo.edu", "+919812345030", ["institution"], "institution", { institutionId: "inst_gcet" });
-  const admin = mk("usr_admin", "Platform Administrator", "admin@skillbridge.demo", "+919812345040", ["admin", "institution"], "admin");
+  const admin = mk("usr_admin", "Platform Administrator", "admin@lincode.demo", "+919812345040", ["admin", "institution"], "admin");
 
   db.users = [priya, arjun, kavya, faculty, recruiter, recruiter2, recruiter3, recruiter4, cdc, admin];
 
@@ -450,7 +450,7 @@ export async function buildSeedDatabase(): Promise<Database> {
   ];
 
   db.trainingPrograms = [
-    { id: "trn_react", organizationId: "org_vertex", postedByUserId: recruiter3.id, title: "Production React — Industry Certification", description: "The React patterns our teams actually use, assessed by a real code review. Certificate is verifiable on your SkillBridge portfolio.", kind: "certification", domainIds: ["fullstack"], skillIds: ["react", "typescript", "testing"], level: "intermediate", durationWeeks: 6, mode: "cohort", certificateOffered: true, seats: 120, startsOn: daysAhead(14), status: "open", createdAt: daysAgo(10) },
+    { id: "trn_react", organizationId: "org_vertex", postedByUserId: recruiter3.id, title: "Production React — Industry Certification", description: "The React patterns our teams actually use, assessed by a real code review. Certificate is verifiable on your LinCode portfolio.", kind: "certification", domainIds: ["fullstack"], skillIds: ["react", "typescript", "testing"], level: "intermediate", durationWeeks: 6, mode: "cohort", certificateOffered: true, seats: 120, startsOn: daysAhead(14), status: "open", createdAt: daysAgo(10) },
     { id: "trn_cloud", organizationId: "org_nimbus", postedByUserId: recruiter.id, title: "Cloud Foundations Bootcamp", description: "Four weeks of guided labs on compute, networking, IAM and containers, ending in a graded deployment.", kind: "training", domainIds: ["cloud"], skillIds: ["cloud-core", "containers", "networking", "cloud-security"], level: "beginner", durationWeeks: 4, mode: "cohort", certificateOffered: true, seats: 200, startsOn: daysAhead(9), status: "open", createdAt: daysAgo(15) },
     { id: "trn_appsec", organizationId: "org_axiom", postedByUserId: recruiter2.id, title: "Application Security Essentials", description: "Hands-on OWASP Top 10 with a vulnerable app you exploit and then fix.", kind: "workshop", domainIds: ["cybersecurity"], skillIds: ["web-security", "secure-coding"], level: "intermediate", durationWeeks: 2, mode: "live", certificateOffered: true, seats: 80, startsOn: daysAhead(11), status: "open", createdAt: daysAgo(8) },
     { id: "trn_ml", organizationId: "org_finlytic", postedByUserId: recruiter4.id, title: "Applied ML Mentorship Track", description: "Eight weeks of mentored project work with a practising ML engineer.", kind: "mentorship", domainIds: ["ml", "data-science"], skillIds: ["ml-supervised", "model-eval", "feature-eng"], level: "intermediate", durationWeeks: 8, mode: "cohort", certificateOffered: true, seats: 40, startsOn: daysAhead(20), status: "open", createdAt: daysAgo(6) },

@@ -1,8 +1,8 @@
 {
-  "name": "skillbridge",
+  "name": "lincode",
   "version": "0.1.0",
   "private": true,
-  "description": "SkillBridge \u2014 skill assessment, personalized learning, internships and placements platform",
+  "description": "LinCode \u2014 skill assessment, personalized learning, internships and placements platform",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

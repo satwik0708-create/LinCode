@@ -1,5 +1,5 @@
 /**
- * SkillBridge domain model.
+ * LinCode domain model.
  *
  * These types are the contract between the data layer, the AI engine and the UI.
  * The MVP persists them through a JSON-backed repository (src/lib/data/store.ts);

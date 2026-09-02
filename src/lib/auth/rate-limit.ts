@@ -11,8 +11,8 @@ interface Bucket {
   resetAt: number;
 }
 
-const globalLimiter = globalThis as unknown as { __sbRateBuckets?: Map<string, Bucket> };
-const buckets: Map<string, Bucket> = (globalLimiter.__sbRateBuckets ??= new Map());
+const globalLimiter = globalThis as unknown as { __lincodeRateBuckets?: Map<string, Bucket> };
+const buckets: Map<string, Bucket> = (globalLimiter.__lincodeRateBuckets ??= new Map());
 
 export interface RateLimitRule {
   /** Requests allowed per window. */

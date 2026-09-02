@@ -16,7 +16,7 @@ let learning: typeof import("../src/lib/data/learning");
 let users: typeof import("../src/lib/data/users");
 
 before(async () => {
-  dir = await mkdtemp(path.join(tmpdir(), "skillbridge-test-"));
+  dir = await mkdtemp(path.join(tmpdir(), "lincode-test-"));
   process.env.DATA_DIR = dir;
   portfolio = await import("../src/lib/data/portfolio");
   opportunities = await import("../src/lib/data/opportunities");
