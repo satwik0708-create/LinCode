@@ -216,15 +216,14 @@ export async function registerInstitution(input: {
     const needle = input.name.trim().toLowerCase();
     const existing = db.institutions.find((i) => i.name.toLowerCase() === needle);
     if (existing) {
-      Object.assign(existing, {
-        type: input.type,
-        website: input.website || existing.website,
-        officialEmail: input.officialEmail || existing.officialEmail,
-        address: input.address || existing.address,
-        city: input.city || existing.city,
-        state: input.state || existing.state,
-        accreditation: input.accreditation || existing.accreditation,
-      });
+      // Registering under a name already on record attaches to it and fills in
+      // what is still blank — it never rewrites detail somebody else supplied.
+      // Otherwise anyone could take over an existing institution's record by
+      // typing its name at signup.
+      existing.website ??= input.website || undefined;
+      existing.officialEmail ??= input.officialEmail || undefined;
+      existing.address ??= input.address || undefined;
+      existing.accreditation ??= input.accreditation || undefined;
       return existing.id;
     }
     const id = newId("inst");

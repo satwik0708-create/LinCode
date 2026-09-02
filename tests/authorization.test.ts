@@ -286,6 +286,24 @@ test("a module checkpoint is evidence, not a re-placement", async () => {
   assert.ok(htmlAfter > 0, "one wrong question must not erase a diagnostic's evidence");
 });
 
+test("registering under an existing institution's name cannot rewrite its record", async () => {
+  const { read } = await import("../src/lib/data/store");
+  const original = (await read()).institutions.find((i) => i.id === "inst_gcet")!;
+  const originalCity = original.city;
+  const originalType = original.type;
+
+  const id = await users.registerInstitution({
+    name: "Government College of Engineering, Pune",
+    type: "deemed", city: "Nowhere", state: "Nowhere",
+    website: "https://impostor.example", accreditation: "Self-declared A++",
+  });
+  assert.equal(id, "inst_gcet", "the same name must attach to the existing record");
+
+  const after = (await read()).institutions.find((i) => i.id === "inst_gcet")!;
+  assert.equal(after.city, originalCity, "an existing field must not be overwritten");
+  assert.equal(after.type, originalType);
+});
+
 test("enrolling in more domains never removes the existing ones", async () => {
   const before = (await users.getStudentProfile("usr_priya"))!.enrollments.map((e) => e.domainId);
   assert.ok(before.includes("fullstack"));
