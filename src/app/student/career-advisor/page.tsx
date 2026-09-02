@@ -33,7 +33,7 @@ export default async function CareerAdvisorPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <AdvisorChat domains={domains} studentName={user.name} />
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Career fit</CardTitle>

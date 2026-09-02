@@ -4,6 +4,7 @@ import { getStudentProfile, upsertStudentProfile } from "./users";
 import { buildDiagnostic, getQuestion } from "@/lib/domain/questions";
 import { modulesForDomain } from "@/lib/domain/curriculum";
 import { placeLearner } from "@/lib/domain/placement";
+import { computeDomainCompletion } from "@/lib/domain/completion";
 import type {
   Assessment, AssessmentResult, DomainEnrollment, LearningLevel, LearningPath,
   LearningProgress, LearningStreak, SkillSignal, StreakActivityType,
@@ -248,17 +249,10 @@ export async function recomputeDomainProgress(userId: string, domainId: string):
   const modules = modulesForDomain(domainId);
   const path = await getLearningPath(userId, domainId);
 
-  // Only modules the path actually asks for count toward completion — a student
-  // placed at advanced is not penalised for skipping beginner material.
-  const required = path
-    ? path.steps.filter((s) => s.status !== "skip").map((s) => s.moduleId)
-    : modules.map((m) => m.id);
-  const skipped = path ? path.steps.filter((s) => s.status === "skip").map((s) => s.moduleId) : [];
-
   const completed = new Set(progress.filter((p) => p.status === "completed").map((p) => p.moduleId));
-  const denominator = required.length || modules.length;
-  const numerator = required.filter((id) => completed.has(id)).length;
-  const percent = denominator === 0 ? 0 : Math.round((numerator / denominator) * 100);
+  // Modules skipped on demonstrated competency leave the denominator; modules
+  // the learner actually completed stay in it and count toward the numerator.
+  const { percent } = computeDomainCompletion(path, modules, completed);
 
   const enrollments = profile.enrollments.map((e) => {
     if (e.domainId !== domainId) return e;
@@ -289,7 +283,6 @@ export async function recomputeDomainProgress(userId: string, domainId: string):
       }
     }
   }
-  void skipped;
 
   await upsertStudentProfile(userId, { enrollments, skillMatrix });
   return percent;

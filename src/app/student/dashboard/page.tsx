@@ -67,9 +67,9 @@ export default async function StudentDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <section>
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
               <h2 className="text-lg font-semibold tracking-tight">My learning</h2>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/student/learning">View all<ArrowRight className="size-3.5" /></Link>
@@ -92,7 +92,7 @@ export default async function StudentDashboard() {
           </section>
 
           <section>
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
               <h2 className="text-lg font-semibold tracking-tight">Recommended for your skill profile</h2>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/student/internships">See all<ArrowRight className="size-3.5" /></Link>
@@ -114,7 +114,7 @@ export default async function StudentDashboard() {
           </section>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <div>
             <h2 className="mb-3 text-lg font-semibold tracking-tight">Learning streak</h2>
             <StreakWidget streak={streak} />

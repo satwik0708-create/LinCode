@@ -31,6 +31,10 @@ const transitionVariants = {
 };
 
 export function HeroSection() {
+  // If the stock photo cannot load, drop it entirely and let the designed panel
+  // stand on its own rather than showing a broken-image frame.
+  const [imageFailed, setImageFailed] = React.useState(false);
+
   return (
     <>
       <HeroHeader />
@@ -132,15 +136,21 @@ export function HeroSection() {
                     <span className="size-2.5 rounded-full bg-success/50" />
                     <span className="ml-3 truncate text-xs text-muted-foreground">skillbridge.app / student / dashboard</span>
                   </div>
-                  <div className="relative aspect-[16/9] w-full">
-                    <Image
-                      src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80"
-                      alt="Students collaborating on a project"
-                      fill
-                      priority
-                      sizes="(max-width: 1024px) 100vw, 72rem"
-                      className="object-cover"
-                    />
+                  {/* The gradient sits beneath the photo, so a slow or blocked
+                      image degrades into a designed panel rather than a broken frame. */}
+                  <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-primary/25 via-chart-3/20 to-chart-2/25">
+                    <div aria-hidden className="absolute inset-0 grid-pattern opacity-30" />
+                    {!imageFailed && (
+                      <Image
+                        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80"
+                        alt="Students collaborating on a project"
+                        fill
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 72rem"
+                        className="object-cover"
+                        onError={() => setImageFailed(true)}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 grid gap-3 p-5 sm:grid-cols-3 sm:p-8">
                       {[

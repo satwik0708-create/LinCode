@@ -128,20 +128,20 @@ export function ProgramBoard({
                   ))}
                 </div>
 
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 border-t pt-3 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
+                <dl className="grid grid-cols-1 gap-x-4 gap-y-1.5 border-t pt-3 text-xs text-muted-foreground sm:grid-cols-2">
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <MapPin className="size-3 shrink-0" />
                     <span className="truncate">{program.location} · {program.mode}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <CalendarDays className="size-3 shrink-0" />
-                    <span>Starts {formatDate(program.startsOn)}</span>
+                    <span className="truncate">Starts {formatDate(program.startsOn)}</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex min-w-0 items-center gap-1.5">
                     <Users className="size-3 shrink-0" />
-                    <span>{program.seats} seats · {program.durationWeeks}w</span>
+                    <span className="truncate">{program.seats} seats · {program.durationWeeks}w</span>
                   </div>
-                  <div className="truncate">{program.stipend ?? "No stipend listed"}</div>
+                  <div className="min-w-0 truncate">{program.stipend ?? "No stipend listed"}</div>
                 </dl>
 
                 <div className="flex items-center justify-between gap-3 pt-1">

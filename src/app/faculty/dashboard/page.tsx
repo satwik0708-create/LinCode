@@ -58,8 +58,8 @@ export default async function FacultyDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="min-w-0 lg:col-span-2">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             <h2 className="text-lg font-semibold tracking-tight">Closing soon</h2>
             <Button asChild variant="ghost" size="sm">
               <Link href="/faculty/collaboration">All opportunities<ArrowRight className="size-3.5" /></Link>
@@ -73,7 +73,7 @@ export default async function FacultyDashboard() {
           />
         </div>
 
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Your applications</CardTitle>

@@ -6,6 +6,7 @@ import { getPortfolio } from "@/lib/data/portfolio";
 import { MODULES } from "@/lib/domain/curriculum";
 import { getDomain } from "@/lib/domain/domains";
 import { skillName } from "@/lib/domain/skills";
+import { computeDomainCompletion } from "@/lib/domain/completion";
 import { getSkillEngine, type EngineContext, type OpportunityMatch } from "@/lib/ai";
 import type {
   Application, DomainEnrollment, LearningLevel, LearningPath, Opportunity,
@@ -58,21 +59,18 @@ export async function getDomainSnapshots(userId: string): Promise<DomainSnapshot
       const domain = getDomain(enrollment.domainId);
       const path = await getLearningPath(userId, enrollment.domainId);
       const domainModules = MODULES.filter((m) => m.domainId === enrollment.domainId);
+      const completion = computeDomainCompletion(path, domainModules, completed);
 
-      const required = path
-        ? path.steps.filter((s) => s.status !== "skip")
-        : domainModules.map((m) => ({ moduleId: m.id, status: "recommended" as const }));
-
-      const next = required.find((s) => !completed.has(s.moduleId));
-      const nextModule = next ? domainModules.find((m) => m.id === next.moduleId) : undefined;
+      const nextId = completion.requiredModuleIds.find((id) => !completed.has(id));
+      const nextModule = nextId ? domainModules.find((m) => m.id === nextId) : undefined;
 
       return {
         enrollment,
         domainName: domain?.name ?? enrollment.domainId,
         gradient: domain?.gradient ?? "from-slate-500 to-slate-600",
         icon: domain?.icon ?? "BookOpen",
-        completedModules: required.filter((s) => completed.has(s.moduleId)).length,
-        totalModules: required.length,
+        completedModules: completion.completedModuleIds.length,
+        totalModules: completion.requiredModuleIds.length,
         nextModuleId: nextModule?.id ?? null,
         nextModuleTitle: nextModule?.title ?? null,
       };

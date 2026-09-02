@@ -115,7 +115,7 @@ export default async function IndustryDashboard() {
       </div>
 
       <section>
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <h2 className="text-lg font-semibold tracking-tight">Recent applicants</h2>
           <Button asChild variant="ghost" size="sm">
             <Link href="/industry/applicants">See all<ArrowRight className="size-3.5" /></Link>

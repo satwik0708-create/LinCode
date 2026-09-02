@@ -85,7 +85,7 @@ export function PortfolioWorkspace({
         type — so nobody has to guess which one they are viewing, and the state
         survives both themes and colour-vision differences.
       */}
-      <nav aria-label="Portfolio sections" className="lg:sticky lg:top-20 lg:self-start">
+      <nav aria-label="Portfolio sections" className="min-w-0 lg:sticky lg:top-20 lg:self-start">
         <ul className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-thin lg:flex-col lg:overflow-visible lg:pb-0">
           {SECTIONS.map((item) => {
             const active = section === item.id;

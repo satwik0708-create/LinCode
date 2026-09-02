@@ -9,6 +9,11 @@
        (cards, gaps, controls) instead of only the text. */
     --font-scale: 1;
 
+    /* Referenced by the Tailwind `sans` stack. A system-first stack means the
+       interface never waits on a network font, and never falls back to serif. */
+    --font-sans: "Inter", "Inter var", ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+
     --background: 210 40% 99%;
     --foreground: 222 47% 11%;
 
@@ -105,6 +110,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 

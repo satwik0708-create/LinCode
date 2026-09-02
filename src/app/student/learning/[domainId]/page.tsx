@@ -68,7 +68,7 @@ export default async function DomainLearningPage({ params }: { params: Promise<{
             />
             <p className="mt-2 text-xs text-muted-foreground">
               {view?.steps.filter((s) => s.completed).length ?? 0} of{" "}
-              {view?.steps.filter((s) => s.status !== "skip").length ?? 0} recommended modules complete
+              {view?.steps.filter((s) => s.status !== "skip" || s.completed).length ?? 0} modules complete
               {enrollment.placementScore !== null && ` · diagnostic score ${enrollment.placementScore}%`}
             </p>
           </div>

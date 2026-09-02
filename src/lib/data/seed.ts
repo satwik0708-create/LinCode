@@ -2,6 +2,7 @@ import "server-only";
 import { emptyDatabase, type Database } from "./store";
 import { hashPassword } from "@/lib/auth/password";
 import { MODULES } from "@/lib/domain/curriculum";
+import { computeDomainCompletion } from "@/lib/domain/completion";
 import type {
   Application, Certification, Institution, LearningProgress, Notification,
   Opportunity, Organization, PortfolioProject, SkillSignal, User,
@@ -208,6 +209,25 @@ export async function buildSeedDatabase(): Promise<Database> {
   completeFor(kavya.id, "cybersecurity", 7);
   completeFor(kavya.id, "fullstack", 4);
   db.learningProgress = progress;
+
+  // Derive each enrolment's progress from the modules actually completed, so the
+  // seeded percentage can never drift from the module counts the UI shows.
+  for (const profile of db.studentProfiles) {
+    const done = new Set(
+      progress.filter((p) => p.userId === profile.userId && p.status === "completed").map((p) => p.moduleId),
+    );
+    profile.enrollments = profile.enrollments.map((enrollment) => {
+      const domainModules = MODULES.filter((m) => m.domainId === enrollment.domainId);
+      const { percent } = computeDomainCompletion(undefined, domainModules, done);
+      const completed = percent >= 100;
+      return {
+        ...enrollment,
+        progress: percent,
+        status: completed ? "completed" : percent > 0 ? "in_progress" : "not_started",
+        completedAt: completed ? (enrollment.completedAt ?? daysAgo(12)) : undefined,
+      };
+    });
+  }
 
   // A 7-day active streak for the primary demo student, with a realistic history.
   const priyaHistory: Record<string, number> = {};

@@ -227,3 +227,48 @@ test("advisor confidence reflects the evidence available", () => {
   }));
   assert.equal(withResults.confidence, "high");
 });
+
+test("completed modules count toward progress instead of vanishing from it", async () => {
+  const { computeDomainCompletion } = await import("../src/lib/domain/completion");
+  const ctx = context({
+    progress: [
+      { id: "p1", userId: "usr_test", domainId: "fullstack", moduleId: "fs-js", status: "completed", percent: 100, updatedAt: "" },
+      { id: "p2", userId: "usr_test", domainId: "fullstack", moduleId: "fs-dom", status: "completed", percent: 100, updatedAt: "" },
+    ],
+  });
+
+  const path = engine.buildLearningPath("fullstack", "intermediate", ctx);
+  const domainModules = MODULES.filter((m) => m.domainId === "fullstack");
+  const completed = new Set(["fs-js", "fs-dom"]);
+  const result = computeDomainCompletion(path, domainModules, completed);
+
+  // The engine marks completed modules "skip"; they must still be counted.
+  assert.ok(result.requiredModuleIds.includes("fs-js"));
+  assert.ok(result.requiredModuleIds.includes("fs-dom"));
+  assert.deepEqual(result.completedModuleIds.sort(), ["fs-dom", "fs-js"]);
+  assert.ok(result.percent > 0, "finishing work must move the number");
+
+  // Modules skipped purely on demonstrated competency stay out of the denominator.
+  assert.ok(result.skippedModuleIds.includes("fs-html"));
+  assert.ok(!result.requiredModuleIds.includes("fs-html"));
+});
+
+test("completion reaches 100% only when every required module is done", async () => {
+  const { computeDomainCompletion } = await import("../src/lib/domain/completion");
+  const domainModules = MODULES.filter((m) => m.domainId === "cybersecurity");
+  const path = engine.buildLearningPath("cybersecurity", "beginner", context());
+
+  const none = computeDomainCompletion(path, domainModules, new Set());
+  assert.equal(none.percent, 0);
+
+  const all = computeDomainCompletion(path, domainModules, new Set(none.requiredModuleIds));
+  assert.equal(all.percent, 100);
+});
+
+test("with no path generated yet, every module in the domain counts", async () => {
+  const { computeDomainCompletion } = await import("../src/lib/domain/completion");
+  const domainModules = MODULES.filter((m) => m.domainId === "cloud");
+  const result = computeDomainCompletion(undefined, domainModules, new Set());
+  assert.equal(result.requiredModuleIds.length, domainModules.length);
+  assert.equal(result.percent, 0);
+});

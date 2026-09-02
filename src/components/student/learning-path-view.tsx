@@ -47,8 +47,10 @@ export function LearningPathView({
     router.refresh();
   }
 
-  const recommended = steps.filter((s) => s.status !== "skip");
-  const skipped = steps.filter((s) => s.status === "skip");
+  // A module the student completed belongs in the sequence, shown as done.
+  // Only competency-based skips go in the collapsed panel.
+  const recommended = steps.filter((s) => s.status !== "skip" || s.completed);
+  const skipped = steps.filter((s) => s.status === "skip" && !s.completed);
 
   return (
     <div className="space-y-6">
