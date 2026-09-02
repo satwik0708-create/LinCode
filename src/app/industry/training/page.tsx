@@ -3,8 +3,11 @@ import Link from "next/link";
 import { requireRole } from "@/lib/auth/guard";
 import { getTrainingRows } from "@/lib/services/recruiter";
 import { listCollaborationPrograms } from "@/lib/data/opportunities";
+import { LEARNING_DOMAINS } from "@/lib/domain/domains";
+import { SKILLS } from "@/lib/domain/skills";
 import { KIND_LABEL } from "@/lib/services/programs";
 import { PageHeader } from "@/components/shell/page-header";
+import { PostTrainingDialog } from "@/components/industry/post-training-dialog";
 import { EmptyState } from "@/components/shell/empty-state";
 import { StatCard } from "@/components/shell/stat-card";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +44,12 @@ export default async function IndustryTrainingPage() {
       <PageHeader
         title="Training & collaboration programmes"
         description="Certifications, workshops and mentorship you publish for students, plus the FDPs, faculty internships, research and consultancy you offer academia."
+        actions={
+          <PostTrainingDialog
+            domains={LEARNING_DOMAINS.map((d) => ({ id: d.id, name: d.name }))}
+            skills={SKILLS.map((s) => ({ id: s.id, name: s.name, domainIds: s.domainIds }))}
+          />
+        }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

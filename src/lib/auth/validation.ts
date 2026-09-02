@@ -224,6 +224,29 @@ export const postOpportunitySchema = z.object({
   deadline: z.string().trim().min(8).max(40),
 });
 
+/**
+ * A training programme a recruiter publishes for students. Skills come from the
+ * shared taxonomy for the same reason postings do: a programme can then be
+ * matched against a student's measured gaps rather than its own prose.
+ */
+export const postTrainingSchema = z.object({
+  title: z.string().trim().min(4).max(120),
+  description: z.string().trim().min(20).max(4000),
+  kind: z.enum(["training", "certification", "workshop", "mentorship"]),
+  level: levelSchema,
+  domainIds: z.array(domainIdSchema).min(1).max(5),
+  skillIds: z.array(z.string().trim().max(60)).min(1).max(20),
+  durationWeeks: z.coerce.number().int().min(1).max(104),
+  mode: z.enum(["self_paced", "cohort", "live"]),
+  certificateOffered: z.boolean().default(false),
+  seats: z.coerce.number().int().min(1).max(5000),
+  startsOn: z.string().trim().min(8).max(40),
+});
+
+export const enrollTrainingSchema = z.object({
+  programId: z.string().trim().min(4).max(64),
+});
+
 export const advisorSchema = z.object({
   question: z.string().trim().min(3, "Ask a question.").max(500),
   domainId: domainIdSchema.optional(),

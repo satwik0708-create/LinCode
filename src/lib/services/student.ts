@@ -1,8 +1,9 @@
 import "server-only";
 import { getStudentProfile } from "@/lib/data/users";
 import { getLearningPath, listProgress, listResults, saveLearningPath, getStreak } from "@/lib/data/learning";
-import { listApplicationsForStudent, listOpportunities } from "@/lib/data/opportunities";
+import { listApplicationsForStudent, listEnrollments, listOpportunities, listTrainingPrograms } from "@/lib/data/opportunities";
 import { getPortfolio } from "@/lib/data/portfolio";
+import { read } from "@/lib/data/store";
 import { MODULES } from "@/lib/domain/curriculum";
 import { getDomain } from "@/lib/domain/domains";
 import { skillName } from "@/lib/domain/skills";
@@ -10,7 +11,7 @@ import { computeDomainCompletion } from "@/lib/domain/completion";
 import { getSkillEngine, type EngineContext, type OpportunityMatch } from "@/lib/ai";
 import type {
   Application, DomainEnrollment, LearningLevel, LearningPath, Opportunity,
-  SkillGapReport, StudentProfile,
+  SkillGapReport, StudentProfile, TrainingProgram,
 } from "@/lib/types";
 
 /**
@@ -126,6 +127,51 @@ export async function getMatchedOpportunities(
       applied: appliedIds.has(opportunity.id),
     }))
     .sort((a, b) => b.match.matchScore - a.match.matchScore);
+}
+
+export interface GapClosingProgram {
+  program: TrainingProgram;
+  organizationName: string;
+  /** Skills the programme teaches that this student is actually short on. */
+  closesSkills: string[];
+  enrolled: boolean;
+}
+
+/**
+ * Training programmes a recruiter published that teach skills this student is
+ * measurably short on in a domain. Programmes touching none of their gaps are
+ * left out — a list of everything on offer would be a catalogue, not advice.
+ */
+export async function getGapClosingPrograms(
+  userId: string,
+  domainId: string,
+): Promise<GapClosingProgram[]> {
+  const report = await getSkillGap(userId, domainId);
+  if (!report) return [];
+
+  const gaps = new Map(
+    [...report.missing, ...report.needsImprovement, ...report.developing].map((e) => [e.skillId, e.skillName]),
+  );
+  if (gaps.size === 0) return [];
+
+  const [programs, enrollments, db] = await Promise.all([
+    listTrainingPrograms({ domainIds: [domainId] }),
+    listEnrollments(userId),
+    read(),
+  ]);
+  const enrolledIds = new Set(enrollments.map((e) => e.programId));
+  const orgName = new Map(db.organizations.map((o) => [o.id, o.name]));
+
+  return programs
+    .filter((program) => program.status === "open")
+    .map((program) => ({
+      program,
+      organizationName: orgName.get(program.organizationId) ?? "Industry partner",
+      closesSkills: program.skillIds.map((id) => gaps.get(id)).filter((n): n is string => Boolean(n)),
+      enrolled: enrolledIds.has(program.id),
+    }))
+    .filter((entry) => entry.closesSkills.length > 0)
+    .sort((a, b) => b.closesSkills.length - a.closesSkills.length);
 }
 
 export interface StudentOverview {

@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole } from "@/lib/auth/guard";
 import { getStudentProfile } from "@/lib/data/users";
-import { getSkillGap } from "@/lib/services/student";
+import { getGapClosingPrograms, getSkillGap } from "@/lib/services/student";
 import { getDomain } from "@/lib/domain/domains";
 import { PageHeader } from "@/components/shell/page-header";
 import { SkillGapView } from "@/components/student/skill-gap-view";
+import { GapPrograms } from "@/components/student/gap-programs";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +39,7 @@ export default async function SkillGapPage() {
       name: getDomain(enrollment.domainId)?.name ?? enrollment.domainId,
       icon: getDomain(enrollment.domainId)?.icon ?? "BookOpen",
       report: await getSkillGap(user.id, enrollment.domainId),
+      programs: await getGapClosingPrograms(user.id, enrollment.domainId),
     })),
   );
 
@@ -65,6 +67,23 @@ export default async function SkillGapPage() {
             ) : (
               <EmptyState icon="Target" title="Not enough evidence yet" description="Take the diagnostic for this domain to generate a gap analysis." />
             )}
+            <GapPrograms
+              programs={entry.programs.map(({ program, organizationName, closesSkills, enrolled }) => ({
+                id: program.id,
+                title: program.title,
+                description: program.description,
+                kind: program.kind,
+                level: program.level,
+                mode: program.mode,
+                durationWeeks: program.durationWeeks,
+                seats: program.seats,
+                startsOn: program.startsOn,
+                certificateOffered: program.certificateOffered,
+                organizationName,
+                closesSkills,
+                enrolled,
+              }))}
+            />
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild size="sm">
                 <Link href={`/student/learning/${entry.id}`}>Open learning path</Link>

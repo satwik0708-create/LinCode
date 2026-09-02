@@ -135,6 +135,54 @@ test("applicant listings are scoped to the employer's own postings", async () =>
   assert.ok(axiom.every((a) => a.opportunityId === "opp_secanalyst"));
 });
 
+test("a training programme is published under the recruiter's own organisation", async () => {
+  const program = await opportunities.createTrainingProgram({
+    organizationId: "org_nimbus",
+    postedByUserId: "usr_recruiter",
+    title: "Kubernetes in Production",
+    description: "Six weeks of live cluster work.",
+    kind: "certification",
+    domainIds: ["cloud"],
+    skillIds: ["cloud_kubernetes"],
+    level: "intermediate",
+    durationWeeks: 6,
+    mode: "cohort",
+    certificateOffered: true,
+    seats: 60,
+    startsOn: new Date().toISOString(),
+    status: "open",
+  });
+
+  // Another employer's programme listing must not include it.
+  const axiom = await opportunities.listTrainingPrograms({ organizationId: "org_axiom" });
+  assert.ok(axiom.every((t) => t.id !== program.id));
+  const nimbus = await opportunities.listTrainingPrograms({ organizationId: "org_nimbus" });
+  assert.ok(nimbus.some((t) => t.id === program.id));
+});
+
+test("enrolling in a training programme is idempotent and refuses closed ones", async () => {
+  const open = await opportunities.createTrainingProgram({
+    organizationId: "org_nimbus", postedByUserId: "usr_recruiter",
+    title: "Observability Clinic", description: "Two weeks on tracing and SLOs.",
+    kind: "workshop", domainIds: ["cloud"], skillIds: ["cloud_observability"],
+    level: "intermediate", durationWeeks: 2, mode: "live", certificateOffered: false,
+    seats: 30, startsOn: new Date().toISOString(), status: "open",
+  });
+  const closed = await opportunities.createTrainingProgram({
+    organizationId: "org_nimbus", postedByUserId: "usr_recruiter",
+    title: "Retired Track", description: "No longer running for new cohorts.",
+    kind: "training", domainIds: ["cloud"], skillIds: ["cloud_cicd"],
+    level: "beginner", durationWeeks: 1, mode: "self_paced", certificateOffered: false,
+    seats: 10, startsOn: new Date().toISOString(), status: "closed",
+  });
+
+  const first = await opportunities.enrollInTraining("usr_priya", open.id);
+  const second = await opportunities.enrollInTraining("usr_priya", open.id);
+  assert.ok(first);
+  assert.equal(second?.id, first?.id, "enrolling twice must not create a second seat");
+  assert.equal(await opportunities.enrollInTraining("usr_priya", closed.id), null);
+});
+
 test("enrolling in more domains never removes the existing ones", async () => {
   const before = (await users.getStudentProfile("usr_priya"))!.enrollments.map((e) => e.domainId);
   assert.ok(before.includes("fullstack"));
