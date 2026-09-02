@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, Circle, Clock, ExternalLink, Loader2, Lock, SkipForward } from "lucide-react";
+import { CheckCircle2, Circle, Clock, ExternalLink, Loader2, Lock, RotateCcw, SkipForward } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,9 +40,12 @@ export function LearningPathView({
   const [busy, setBusy] = React.useState<string>();
   const [expanded, setExpanded] = React.useState<string>();
 
-  async function complete(moduleId: string, status: "completed" | "in_progress") {
+  // Only ever marks a module complete. Finished modules offer Redo, which
+  // reopens the material without touching progress — sending a module back
+  // to in-progress used to pull the domain percentage down, punishing revision.
+  async function complete(moduleId: string) {
     setBusy(moduleId);
-    await postJson("/api/learning/progress", { domainId, moduleId, status, minutes: 30 });
+    await postJson("/api/learning/progress", { domainId, moduleId, status: "completed", minutes: 30 });
     setBusy(undefined);
     router.refresh();
   }
@@ -144,14 +147,19 @@ export function LearningPathView({
                           {open ? "Hide resources" : `${step.resources.length} resources`}
                         </Button>
                         {!step.completed ? (
-                          <Button size="sm" onClick={() => complete(step.moduleId, "completed")} disabled={busy === step.moduleId || locked}>
+                          <Button size="sm" onClick={() => complete(step.moduleId)} disabled={busy === step.moduleId || locked}>
                             {busy === step.moduleId && <Loader2 className="size-3.5 animate-spin" />}
                             Mark complete
                           </Button>
                         ) : (
-                          <Button size="sm" variant="ghost" onClick={() => complete(step.moduleId, "in_progress")} disabled={busy === step.moduleId}>
-                            {busy === step.moduleId && <Loader2 className="size-3.5 animate-spin" />}
-                            Reopen
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setExpanded(step.moduleId)}
+                            title="Reopen the course content. Your progress is unaffected."
+                          >
+                            <RotateCcw className="size-3.5" />
+                            Redo
                           </Button>
                         )}
                       </div>

@@ -175,7 +175,9 @@ test("grading happens server-side and folds into the skill matrix", async () => 
 
   const result = await learning.gradeAssessment(assessment, perfect);
   assert.equal(result.scorePercent, 100);
-  assert.equal(result.placedLevel, "advanced");
+  // Declared intermediate, so the ceiling is the intermediate track however
+  // well the paper is answered.
+  assert.equal(result.placedLevel, "intermediate");
 
   const profile = await users.getStudentProfile("usr_arjun");
   assert.ok(Object.keys(result.skillScores).length > 0);

@@ -11,6 +11,8 @@ import { DomainIcon } from "@/components/student/domain-icon";
 import { EmptyState } from "@/components/shell/empty-state";
 import { cn, formatDate } from "@/lib/utils";
 
+type Level = "beginner" | "intermediate" | "advanced";
+
 interface DomainRow {
   id: string;
   name: string;
@@ -29,7 +31,12 @@ export function AssessmentCentre({ domains, initialDomain }: { domains: DomainRo
   const [running, setRunning] = React.useState<DomainRow | undefined>(
     initialDomain ? domains.find((d) => d.id === initialDomain) : undefined,
   );
-  const [level, setLevel] = React.useState<"beginner" | "intermediate" | "advanced">("intermediate");
+  // Level is per domain: a student can be advanced in one and a beginner in
+  // another, so one shared value was both wrong and confusing.
+  const [levels, setLevels] = React.useState<Record<string, Level>>(() =>
+    Object.fromEntries(domains.map((d) => [d.id, d.declaredLevel])),
+  );
+  const levelFor = (id: string): Level => levels[id] ?? "intermediate";
 
   if (domains.length === 0) {
     return (
@@ -49,10 +56,10 @@ export function AssessmentCentre({ domains, initialDomain }: { domains: DomainRo
           Back to assessments
         </Button>
         <AssessmentRunner
-          key={`${running.id}-${level}`}
+          key={`${running.id}-${levelFor(running.id)}`}
           domainId={running.id}
           domainName={running.name}
-          declaredLevel={level}
+          declaredLevel={levelFor(running.id)}
           completeLabel="Back to assessments"
           onComplete={() => { setRunning(undefined); router.refresh(); }}
         />
@@ -99,11 +106,13 @@ export function AssessmentCentre({ domains, initialDomain }: { domains: DomainRo
                   <button
                     key={option}
                     type="button"
-                    onClick={() => setLevel(option)}
-                    aria-pressed={level === option}
+                    onClick={() => setLevels((prev) => ({ ...prev, [domain.id]: option }))}
+                    aria-pressed={levelFor(domain.id) === option}
                     className={cn(
                       "rounded-lg border px-2 py-1.5 text-[11px] font-medium capitalize transition-colors",
-                      level === option ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
+                      levelFor(domain.id) === option
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-accent",
                     )}
                   >
                     {option}
@@ -112,9 +121,9 @@ export function AssessmentCentre({ domains, initialDomain }: { domains: DomainRo
               </div>
             </div>
 
-            <Button size="sm" className="w-full" onClick={() => setRunning(domain)} disabled={level === "beginner"}>
+            <Button size="sm" className="w-full" onClick={() => setRunning(domain)} disabled={levelFor(domain.id) === "beginner"}>
               <Play className="size-3.5" />
-              {level === "beginner" ? "Beginner needs no test" : "Start diagnostic"}
+              {levelFor(domain.id) === "beginner" ? "Beginner needs no test" : "Start diagnostic"}
             </Button>
           </CardContent>
         </Card>
