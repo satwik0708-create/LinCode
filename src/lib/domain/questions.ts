@@ -278,3 +278,57 @@ export function buildDiagnostic(domainId: string, declaredLevel: LearningLevel, 
 
   return picked.slice(0, Math.min(size, eligible.length));
 }
+
+/**
+ * Build the checkpoint quiz that follows a module.
+ *
+ * It probes the module's own skills first — that is what the student just
+ * studied, and what a report on this checkpoint has to be able to talk about.
+ * When a module's skills have too few items banked, the remainder comes from
+ * the rest of the domain at or below the module's level, so a short bank
+ * produces a shorter quiz rather than an off-topic one.
+ */
+export function buildModuleQuiz(
+  domainId: string,
+  moduleSkills: string[],
+  moduleLevel: LearningLevel,
+  size = 5,
+): AssessmentQuestion[] {
+  const pool = questionsForDomain(domainId);
+  const rank: Record<LearningLevel, number> = { beginner: 0, intermediate: 1, advanced: 2 };
+  const withinLevel = (q: AssessmentQuestion) => rank[q.level] <= rank[moduleLevel];
+
+  const skills = new Set(moduleSkills);
+  const onTopic = pool.filter((q) => skills.has(q.skillId));
+
+  // Round-robin across the module's skills so a five-question quiz covers all
+  // of them rather than five items on whichever skill has the deepest bank.
+  const bySkill = new Map<string, AssessmentQuestion[]>();
+  for (const q of onTopic) {
+    const list = bySkill.get(q.skillId) ?? [];
+    list.push(q);
+    bySkill.set(q.skillId, list);
+  }
+
+  const picked: AssessmentQuestion[] = [];
+  const queues = [...bySkill.values()];
+  let round = 0;
+  while (picked.length < size && queues.some((queue) => queue.length > round)) {
+    for (const queue of queues) {
+      if (picked.length >= size) break;
+      const q = queue[round];
+      if (q) picked.push(q);
+    }
+    round += 1;
+  }
+
+  if (picked.length < size) {
+    const chosen = new Set(picked.map((q) => q.id));
+    for (const q of pool) {
+      if (picked.length >= size) break;
+      if (!chosen.has(q.id) && withinLevel(q)) picked.push(q);
+    }
+  }
+
+  return picked.slice(0, size);
+}

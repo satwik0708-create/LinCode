@@ -33,7 +33,7 @@ The datastore seeds itself on first run, so the demo accounts work immediately.
 | --- | --- |
 | `npm run dev` | Development server |
 | `npm run build` / `npm start` | Production build and serve |
-| `npm test` | 62 unit and integration tests |
+| `npm test` | 63 unit and integration tests |
 | `npm run seed` | Reset the datastore to its seeded demo state |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
@@ -81,7 +81,8 @@ Run `npm run seed` between rehearsals to clear every account created this way.
 Landing → Choose role → Sign up → Student profile → Choose one or more domains
        → Choose a level per domain → Diagnostic (intermediate/advanced only)
        → Placement → AI skill-gap analysis → Personalised path → Dashboard
-       → Learn → Track progress → Maintain streak → Update skill profile
+       → Learn → Checkpoint quiz per module → Report naming the gaps it found
+       → Track progress → Maintain streak → Update skill profile
        → Internship/job recommendations → Apply → Track → Verified portfolio
 ```
 

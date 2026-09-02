@@ -263,6 +263,11 @@ export const reviewCertificationSchema = z.object({
   note: z.string().trim().max(400).optional(),
 });
 
+export const startModuleQuizSchema = z.object({
+  domainId: domainIdSchema,
+  moduleId: z.string().trim().min(2).max(64),
+});
+
 export const advisorSchema = z.object({
   question: z.string().trim().min(3, "Ask a question.").max(500),
   domainId: domainIdSchema.optional(),

@@ -260,6 +260,32 @@ test("enrolling in a training programme is idempotent and refuses closed ones", 
   assert.equal(await opportunities.enrollInTraining("usr_priya", closed.id), null);
 });
 
+test("a module checkpoint is evidence, not a re-placement", async () => {
+  const before = (await users.getStudentProfile("usr_priya"))!;
+  const enrolment = before.enrollments.find((e) => e.domainId === "fullstack")!;
+  const placedBefore = enrolment.placedLevel;
+  const htmlBefore = before.skillMatrix.html?.score ?? 0;
+
+  const quiz = await learning.createModuleQuiz("usr_priya", "fullstack", "fs-html", ["html"], "beginner");
+  assert.ok(quiz.questionIds.length > 0, "the checkpoint must have questions to be worth anything");
+
+  // Answer everything wrong.
+  const result = await learning.gradeAssessment(quiz, {});
+  assert.equal(result.scorePercent, 0);
+  assert.equal(result.moduleId, "fs-html");
+
+  const after = (await users.getStudentProfile("usr_priya"))!;
+  assert.equal(
+    after.enrollments.find((e) => e.domainId === "fullstack")!.placedLevel,
+    placedBefore,
+    "a short checkpoint must not re-place the learner",
+  );
+  // The score moves toward the new evidence without being replaced by it.
+  const htmlAfter = after.skillMatrix.html?.score ?? 0;
+  assert.ok(htmlAfter < htmlBefore, "failing the checkpoint must lower the skill");
+  assert.ok(htmlAfter > 0, "one wrong question must not erase a diagnostic's evidence");
+});
+
 test("enrolling in more domains never removes the existing ones", async () => {
   const before = (await users.getStudentProfile("usr_priya"))!.enrollments.map((e) => e.domainId);
   assert.ok(before.includes("fullstack"));
