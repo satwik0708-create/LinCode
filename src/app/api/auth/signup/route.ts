@@ -4,7 +4,9 @@ import { signupSchema } from "@/lib/auth/validation";
 import { RATE_LIMITS } from "@/lib/auth/rate-limit";
 import { checkPasswordStrength, hashPassword } from "@/lib/auth/password";
 import { createSessionToken, sessionCookieOptions, sessionTtl, SESSION_COOKIE } from "@/lib/auth/session";
-import { audit, createUser, findUserByEmail, findUserByMobile, toPublicUser } from "@/lib/data/users";
+import { assignRole, audit, createUser, findUserByEmail, findUserByMobile, toPublicUser } from "@/lib/data/users";
+import { ONBOARDING_ENTRY } from "@/lib/auth/roles";
+import type { Role } from "@/lib/types";
 import { clientIp } from "@/lib/auth/guard";
 
 export async function POST(request: Request) {
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
 
   const parsed = await readJson(request, signupSchema);
   if (!parsed.ok) return parsed.response;
-  const { name, email, mobile, password } = parsed.data;
+  const { role, name, email, mobile, password } = parsed.data;
 
   const strength = checkPasswordStrength(password);
   if (!strength.ok) {
@@ -41,17 +43,28 @@ export async function POST(request: Request) {
     const passwordHash = await hashPassword(password);
     const user = await createUser({ name, email, mobile, passwordHash });
 
-    // No role is granted yet — the user picks one at /onboarding/role, and the
-    // session carries an empty grant list until they do.
+    // The role was chosen before credentials, so grant it now. The schema only
+    // admits the four self-selectable roles, so `admin` can never arrive here.
+    const granted = (await assignRole(user.id, role as Role)) ?? user;
+
     const token = await createSessionToken(
-      { sub: user.id, name: user.name, roles: [], activeRole: null, onboardingComplete: false },
+      {
+        sub: granted.id,
+        name: granted.name,
+        roles: granted.roles,
+        activeRole: granted.activeRole,
+        onboardingComplete: false,
+      },
       sessionTtl(false),
     );
     const store = await cookies();
     store.set(SESSION_COOKIE, token, sessionCookieOptions(sessionTtl(false)));
 
-    await audit({ userId: user.id, action: "auth.signup", outcome: "success", ip });
-    return ok({ user: toPublicUser(user), next: "/onboarding/role" }, { status: 201 });
+    await audit({ userId: granted.id, action: "auth.signup", outcome: "success", ip, detail: role });
+    return ok(
+      { user: toPublicUser(granted), next: ONBOARDING_ENTRY[role as Role] },
+      { status: 201 },
+    );
   } catch (error) {
     return serverError("signup", error);
   }

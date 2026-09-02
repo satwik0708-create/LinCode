@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import {
-  Award, BadgeCheck, Boxes, BriefcaseBusiness, ExternalLink, FileText,
-  GraduationCap, LayoutGrid, Link2, ShieldCheck, Sparkles, Target,
+  Award, BadgeCheck, Boxes, BriefcaseBusiness, Clock, ExternalLink, FileText,
+  GraduationCap, LayoutGrid, Link2, Paperclip, ShieldAlert, ShieldCheck, Sparkles, Target,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shell/empty-state";
 import { cn, formatDate, initials } from "@/lib/utils";
-import type { AcademicRecord, Achievement, Certification, PortfolioProject } from "@/lib/types";
+import type { AcademicRecord, Achievement, Certification, PortfolioProject, VerificationStatus } from "@/lib/types";
+import { AddCertificationDialog, type CertSkillOption } from "@/components/student/add-certification-dialog";
 
 type SectionId =
   | "overview" | "skills" | "certifications" | "projects"
@@ -48,6 +49,7 @@ interface DomainRow {
 
 export function PortfolioWorkspace({
   student, skills, certifications, projects, achievements, academicRecords, documents, internships, domains,
+  certifiableSkills,
 }: {
   student: {
     name: string; headline?: string; about?: string; institutionName: string;
@@ -62,6 +64,7 @@ export function PortfolioWorkspace({
   documents: DocumentRow[];
   internships: InternshipRow[];
   domains: DomainRow[];
+  certifiableSkills: CertSkillOption[];
 }) {
   const [section, setSection] = React.useState<SectionId>("overview");
 
@@ -235,32 +238,53 @@ export function PortfolioWorkspace({
         )}
 
         {section === "certifications" && (
-          <SectionList
-            empty={{ icon: "GraduationCap", title: "No certifications yet", description: "Complete an industry training programme to add a verifiable certificate." }}
-            items={certifications}
-            render={(cert) => (
-              <Card key={cert.id}>
-                <CardContent className="p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="font-semibold">{cert.name}</h3>
-                      <p className="text-sm text-muted-foreground">{cert.issuer} · {formatDate(cert.issuedOn)}</p>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">
+                Attach the certificate and {student.institutionName} can verify it. Unattached entries stay self-reported.
+              </p>
+              <AddCertificationDialog skills={certifiableSkills} />
+            </div>
+            <SectionList
+              empty={{ icon: "GraduationCap", title: "No certifications yet", description: "Add a certificate you have earned — attach the file and your institution can verify it." }}
+              items={certifications}
+              render={(cert) => (
+                <Card key={cert.id}>
+                  <CardContent className="p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold">{cert.name}</h3>
+                        <p className="text-sm text-muted-foreground">{cert.issuer} · {formatDate(cert.issuedOn)}</p>
+                      </div>
+                      <CertificationStatusBadge status={cert.verificationStatus} verified={cert.verified} />
                     </div>
-                    <VerifiedBadge verified={cert.verified} />
-                  </div>
-                  {cert.credentialId && <p className="mt-2 text-xs text-muted-foreground">Credential ID: {cert.credentialId}</p>}
-                  {cert.credentialUrl && (
-                    <Button asChild size="sm" variant="outline" className="mt-3">
-                      <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer">
-                        <Link2 className="size-3.5" />
-                        Verify credential
-                      </a>
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          />
+                    {cert.credentialId && <p className="mt-2 text-xs text-muted-foreground">Credential ID: {cert.credentialId}</p>}
+                    {cert.verificationStatus === "rejected" && cert.reviewNote && (
+                      <p className="mt-2 text-xs text-destructive">Reviewer&rsquo;s note: {cert.reviewNote}</p>
+                    )}
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {cert.credentialUrl && (
+                        <Button asChild size="sm" variant="outline">
+                          <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer">
+                            <Link2 className="size-3.5" />
+                            Verify credential
+                          </a>
+                        </Button>
+                      )}
+                      {cert.documentId && (
+                        <Button asChild size="sm" variant="ghost">
+                          <a href={`/api/documents/${cert.documentId}/content`} target="_blank" rel="noopener noreferrer">
+                            <Paperclip className="size-3.5" />
+                            View certificate
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            />
+          </div>
         )}
 
         {section === "projects" && (
@@ -426,6 +450,24 @@ function OverviewStat({ label, value, hint }: { label: string; value: number; hi
       </CardContent>
     </Card>
   );
+}
+
+/**
+ * A certification carries more state than verified/not: it can be waiting on a
+ * reviewer, or have come back rejected. Collapsing those into "self-reported"
+ * would hide the fact that somebody already looked and said no.
+ */
+function CertificationStatusBadge({ status, verified }: { status: VerificationStatus; verified: boolean }) {
+  if (status === "verified" || verified) {
+    return <Badge variant="success" className="gap-1"><ShieldCheck className="size-3" />Verified</Badge>;
+  }
+  if (status === "pending") {
+    return <Badge variant="muted" className="gap-1"><Clock className="size-3" />Awaiting verification</Badge>;
+  }
+  if (status === "rejected") {
+    return <Badge variant="destructive" className="gap-1"><ShieldAlert className="size-3" />Not verified</Badge>;
+  }
+  return <Badge variant="muted" className="gap-1"><Sparkles className="size-3" />Self-reported</Badge>;
 }
 
 function VerifiedBadge({ verified, label = "Verified" }: { verified: boolean; label?: string }) {

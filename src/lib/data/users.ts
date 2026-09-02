@@ -2,7 +2,7 @@ import "server-only";
 import { mutate, newId, nowIso, read } from "./store";
 import type {
   AuditEvent, FacultyProfile, IndustryProfile, InstitutionProfile,
-  Notification, PublicUser, Role, StudentProfile, User,
+  Institution, Notification, PublicUser, Role, StudentProfile, User,
 } from "@/lib/types";
 
 /** Strip everything that must never cross the network boundary. */
@@ -193,6 +193,55 @@ export async function upsertInstitutionProfile(userId: string, patch: Partial<In
     }
     Object.assign(profile, patch, { userId, updatedAt: nowIso() });
     return profile;
+  });
+}
+
+/**
+ * Create or update the institution an institutional user registered.
+ *
+ * Registration carries the institution's own identity — type, website, address,
+ * accreditation — which a record inferred from a student profile never has.
+ */
+export async function registerInstitution(input: {
+  name: string;
+  type: Institution["type"];
+  website?: string;
+  officialEmail?: string;
+  address?: string;
+  city: string;
+  state: string;
+  accreditation?: string;
+}): Promise<string> {
+  return mutate((db) => {
+    const needle = input.name.trim().toLowerCase();
+    const existing = db.institutions.find((i) => i.name.toLowerCase() === needle);
+    if (existing) {
+      // Registering under a name already on record attaches to it and fills in
+      // what is still blank — it never rewrites detail somebody else supplied.
+      // Otherwise anyone could take over an existing institution's record by
+      // typing its name at signup.
+      existing.website ??= input.website || undefined;
+      existing.officialEmail ??= input.officialEmail || undefined;
+      existing.address ??= input.address || undefined;
+      existing.accreditation ??= input.accreditation || undefined;
+      return existing.id;
+    }
+    const id = newId("inst");
+    db.institutions.push({
+      id,
+      name: input.name.trim(),
+      type: input.type,
+      city: input.city,
+      state: input.state,
+      departments: [],
+      studentCount: 0,
+      website: input.website || undefined,
+      officialEmail: input.officialEmail || undefined,
+      address: input.address || undefined,
+      accreditation: input.accreditation || undefined,
+      createdAt: nowIso(),
+    });
+    return id;
   });
 }
 

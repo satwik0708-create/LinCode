@@ -132,11 +132,13 @@ export async function mutate<T>(fn: (db: Database) => T | Promise<T>): Promise<T
   return run;
 }
 
-/** Test/dev helper: drop the in-memory cache and the file. */
+/** Test/dev helper: drop the in-memory cache, the file, and any uploads it referenced. */
 export async function resetStore(): Promise<void> {
   cache.db = null;
   cache.loading = null;
   await fs.rm(DB_FILE, { force: true });
+  const { clearUploads } = await import("./uploads");
+  await clearUploads();
 }
 
 export function newId(prefix: string): string {

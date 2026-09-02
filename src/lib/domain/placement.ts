@@ -30,9 +30,10 @@ export const DEFAULT_PLACEMENT_POLICY: PlacementPolicy = {
     // Beginners are taken at their word and start at the beginning.
     beginner: [{ minScore: 0, level: "beginner", label: "Beginner track" }],
 
-    // "I've learned some of this" — prove it, or start over.
+    // "I've learned some of this" — prove it, or start over. An intermediate
+    // paper only covers beginner and intermediate material, so acing it cannot
+    // evidence advanced competence: the ceiling here is the intermediate track.
     intermediate: [
-      { minScore: 85, level: "advanced", label: "Advanced track" },
       { minScore: 40, level: "intermediate", label: "Intermediate track" },
       { minScore: 0, level: "beginner", label: "Beginner track" },
     ],

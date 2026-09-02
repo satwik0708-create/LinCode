@@ -126,6 +126,8 @@ export interface FacultyProfile {
   userId: string;
   institutionId?: string;
   institutionName: string;
+  /** ISO date. Optional so profiles created before this field stay valid. */
+  dateOfBirth?: string;
   department: string;
   designation: string;
   yearsOfExperience: number;
@@ -147,22 +149,36 @@ export interface IndustryProfile {
   updatedAt: string;
 }
 
+/** The person acting for an institution, distinct from the institution itself. */
 export interface InstitutionProfile {
   userId: string;
   institutionId: string;
   designation: string;
   department?: string;
+  officialEmail?: string;
+  mobile?: string;
+  /** Why they are here — placement drives, analytics, industry outreach. */
+  purpose?: string;
   updatedAt: string;
 }
+
+export type InstitutionType = "university" | "college" | "polytechnic" | "iti" | "autonomous" | "deemed";
 
 export interface Institution {
   id: string;
   name: string;
-  type: "university" | "college" | "polytechnic" | "iti";
+  type: InstitutionType;
   city: string;
   state: string;
   departments: string[];
   studentCount: number;
+  /** Captured when an institution registers itself, blank for ones inferred
+   *  from a student or faculty profile. */
+  website?: string;
+  officialEmail?: string;
+  address?: string;
+  /** e.g. "NAAC A++", "NBA accredited", "Affiliated to SPPU". */
+  accreditation?: string;
   createdAt: string;
 }
 
@@ -270,8 +286,10 @@ export interface Assessment {
   id: string;
   userId: string;
   domainId: string;
-  kind: "placement" | "practice" | "soft_skills";
+  kind: "placement" | "practice" | "soft_skills" | "module";
   declaredLevel: LearningLevel;
+  /** Set for a module checkpoint quiz — the subtopic it follows. */
+  moduleId?: string;
   questionIds: string[];
   createdAt: string;
   expiresAt: string;
@@ -290,7 +308,57 @@ export interface AssessmentResult {
   placedLevel: LearningLevel;
   /** Per-skill breakdown, 0-100. */
   skillScores: Record<string, number>;
+  /** Set when the result came from a module checkpoint rather than a diagnostic. */
+  moduleId?: string;
   createdAt: string;
+}
+
+/**
+ * What a student sees after a module checkpoint.
+ *
+ * The answer key is included deliberately — it is only ever built *after* the
+ * submission is graded and stored, so revealing it cannot change the score, and
+ * a checkpoint you cannot learn from is a waste of the student's time.
+ */
+export interface QuizReviewItem {
+  questionId: string;
+  prompt: string;
+  options: string[];
+  skillId: string;
+  skillName: string;
+  chosenIndex: number | null;
+  correctIndex: number;
+  correct: boolean;
+  explanation: string;
+}
+
+export interface ModuleQuizGap {
+  skillId: string;
+  skillName: string;
+  /** Score on this checkpoint, 0-100. */
+  score: number;
+  /** What the market expects for this skill in the domain, 0-100. */
+  requiredScore: number;
+  missedCount: number;
+  totalCount: number;
+  /** Modules in this domain that teach the skill, for a concrete next step. */
+  revisit: Array<{ moduleId: string; title: string }>;
+}
+
+export interface ModuleQuizReport {
+  resultId: string;
+  moduleId: string;
+  moduleTitle: string;
+  domainId: string;
+  domainName: string;
+  scorePercent: number;
+  correctCount: number;
+  totalCount: number;
+  passed: boolean;
+  summary: string;
+  gaps: ModuleQuizGap[];
+  strengths: Array<{ skillId: string; skillName: string; score: number }>;
+  review: QuizReviewItem[];
 }
 
 export interface SkillGapEntry {
@@ -380,6 +448,13 @@ export interface LearningStreak {
 /* Portfolio                                                           */
 /* ------------------------------------------------------------------ */
 
+/**
+ * `verified` is the claim's outcome; `verificationStatus` is where it is in the
+ * review. A certificate with no evidence attached stays "unverified" — nobody
+ * is asked to rubber-stamp a bare assertion.
+ */
+export type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
+
 export interface Certification {
   id: string;
   userId: string;
@@ -391,6 +466,13 @@ export interface Certification {
   skillIds: string[];
   verified: boolean;
   verifiedBy?: string;
+  verificationStatus: VerificationStatus;
+  /** Uploaded certificate backing the claim, read only through the documents route. */
+  documentId?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
+  /** Reviewer's note, shown to the student — the reason a claim was rejected. */
+  reviewNote?: string;
 }
 
 export interface PortfolioProject {

@@ -20,8 +20,9 @@ export default async function FacultyOnboardingPage() {
           fields: [
             { kind: "text", name: "institutionName", label: "Institution", placeholder: "Government College of Engineering, Pune", required: true, span: true },
             { kind: "text", name: "department", label: "Department", placeholder: "Computer Engineering", required: true },
-            { kind: "text", name: "designation", label: "Designation", placeholder: "Associate Professor", required: true },
-            { kind: "number", name: "yearsOfExperience", label: "Years of experience", placeholder: "12", min: 0, max: 60, required: true },
+            { kind: "text", name: "designation", label: "Current role", placeholder: "Associate Professor", required: true },
+            { kind: "date", name: "dateOfBirth", label: "Date of birth", max: new Date().toISOString().slice(0, 10) },
+            { kind: "number", name: "yearsOfExperience", label: "Years in this role", placeholder: "12", min: 0, max: 60, required: true },
           ],
         },
         {

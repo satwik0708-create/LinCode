@@ -21,7 +21,11 @@ test("a declared level is a hypothesis, not a verdict", () => {
 
   // Demonstrated mastery confirms the advanced track.
   assert.equal(placeLearner("advanced", 100).level, "advanced");
-  assert.equal(placeLearner("intermediate", 95).level, "advanced");
+
+  // An intermediate paper cannot evidence advanced competence, however well it
+  // is answered — the ceiling for that test is the intermediate track.
+  assert.equal(placeLearner("intermediate", 95).level, "intermediate");
+  assert.equal(placeLearner("intermediate", 100).level, "intermediate");
 });
 
 test("beginners are always placed at beginner", () => {

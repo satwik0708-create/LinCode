@@ -1,7 +1,7 @@
 import "server-only";
 import { mutate, newId, nowIso, read } from "./store";
 import { getStudentProfile, upsertStudentProfile } from "./users";
-import { buildDiagnostic, getQuestion } from "@/lib/domain/questions";
+import { buildDiagnostic, buildModuleQuiz, getQuestion } from "@/lib/domain/questions";
 import { modulesForDomain } from "@/lib/domain/curriculum";
 import { placeLearner } from "@/lib/domain/placement";
 import { computeDomainCompletion } from "@/lib/domain/completion";
@@ -11,6 +11,14 @@ import type {
 } from "@/lib/types";
 
 const ASSESSMENT_TTL_MINUTES = 90;
+/** Short on purpose: a checkpoint after one subtopic, not a second diagnostic. */
+export const MODULE_QUIZ_SIZE = 5;
+/**
+ * How much a checkpoint has to overcome the score already on record, expressed
+ * as the number of questions the existing signal is worth. At 2, one question
+ * moves a skill a third of the way; five questions move it most of the way.
+ */
+const CHECKPOINT_PRIOR_WEIGHT = 2;
 
 /* ---------------- Enrollments ---------------- */
 
@@ -78,6 +86,38 @@ export async function createAssessment(
   });
 }
 
+/**
+ * The checkpoint quiz that follows a module.
+ *
+ * Kind "module" rather than "placement": passing one is evidence about the
+ * subtopic just studied, not a reason to move the student to a different track.
+ */
+export async function createModuleQuiz(
+  userId: string,
+  domainId: string,
+  moduleId: string,
+  moduleSkills: string[],
+  moduleLevel: LearningLevel,
+  size = MODULE_QUIZ_SIZE,
+): Promise<Assessment> {
+  const questions = buildModuleQuiz(domainId, moduleSkills, moduleLevel, size);
+  return mutate((db) => {
+    const assessment: Assessment = {
+      id: newId("asm"),
+      userId,
+      domainId,
+      kind: "module",
+      moduleId,
+      declaredLevel: moduleLevel,
+      questionIds: questions.map((q) => q.id),
+      createdAt: nowIso(),
+      expiresAt: new Date(Date.now() + ASSESSMENT_TTL_MINUTES * 60_000).toISOString(),
+    };
+    db.assessments.push(assessment);
+    return assessment;
+  });
+}
+
 export async function getAssessment(id: string): Promise<Assessment | undefined> {
   const db = await read();
   return db.assessments.find((a) => a.id === id);
@@ -128,6 +168,7 @@ export async function gradeAssessment(
     declaredLevel: assessment.declaredLevel,
     placedLevel: placed.level,
     skillScores,
+    moduleId: assessment.moduleId,
     createdAt: nowIso(),
   };
 
@@ -137,13 +178,21 @@ export async function gradeAssessment(
     db.assessmentResults.push(result);
   });
 
-  await applyAssessmentToProfile(result);
+  await applyAssessmentToProfile(
+    result,
+    assessment.kind,
+    new Map([...perSkill].map(([skillId, { total }]) => [skillId, total])),
+  );
   await recordActivity(assessment.userId, "assessment_completed", assessment.domainId, 25);
   return result;
 }
 
 /** Fold assessment evidence into the student's skill matrix and enrollment. */
-async function applyAssessmentToProfile(result: AssessmentResult): Promise<void> {
+async function applyAssessmentToProfile(
+  result: AssessmentResult,
+  kind: Assessment["kind"] = "placement",
+  questionsPerSkill: Map<string, number> = new Map(),
+): Promise<void> {
   const profile = await getStudentProfile(result.userId);
   if (!profile) return;
 
@@ -153,26 +202,44 @@ async function applyAssessmentToProfile(result: AssessmentResult): Promise<void>
     // Assessment evidence outranks self-reports; between two assessments, keep
     // the more recent signal so improvement is visible.
     if (previous && previous.source === "verified") continue;
+
+    // A ten-question diagnostic speaks for itself and replaces what came
+    // before. A checkpoint may rest on a single question, which is far too
+    // thin to overwrite a diagnostic outright — so it moves the existing score
+    // toward its own, weighted by how many questions actually backed it.
+    let next = score;
+    if (kind === "module" && previous) {
+      const asked = questionsPerSkill.get(skillId) ?? 1;
+      const weight = asked / (asked + CHECKPOINT_PRIOR_WEIGHT);
+      next = Math.round(previous.score * (1 - weight) + score * weight);
+    }
+
     skillMatrix[skillId] = {
       skillId,
-      score,
-      strength: score >= 75 ? "strong" : score >= 45 ? "developing" : "weak",
+      score: next,
+      strength: next >= 75 ? "strong" : next >= 45 ? "developing" : "weak",
       source: "assessment",
       verified: false,
       updatedAt: nowIso(),
     } satisfies SkillSignal;
   }
 
-  const enrollments = profile.enrollments.map((e) =>
-    e.domainId === result.domainId
-      ? {
-          ...e,
-          placedLevel: result.placedLevel,
-          placementScore: result.scorePercent,
-          status: e.status === "not_started" ? ("in_progress" as const) : e.status,
-        }
-      : e,
-  );
+  // Only a diagnostic places a learner. A module checkpoint is evidence about
+  // one subtopic — letting a five-question quiz rewrite the whole track would
+  // undo the placement the diagnostic earned.
+  const enrollments =
+    kind === "placement"
+      ? profile.enrollments.map((e) =>
+          e.domainId === result.domainId
+            ? {
+                ...e,
+                placedLevel: result.placedLevel,
+                placementScore: result.scorePercent,
+                status: e.status === "not_started" ? ("in_progress" as const) : e.status,
+              }
+            : e,
+        )
+      : profile.enrollments;
 
   await upsertStudentProfile(result.userId, { skillMatrix, enrollments });
 }

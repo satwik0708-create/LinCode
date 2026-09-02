@@ -24,8 +24,9 @@ export async function middleware(request: NextRequest) {
   const needsAuth = PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const session = await verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value);
 
-  // Signed-in users have no business on the auth screens.
-  if (session && (pathname === "/login" || pathname === "/signup")) {
+  // Signed-in users have no business on the auth screens. Signup now has a
+  // role segment (/signup/student), so match the whole subtree.
+  if (session && (pathname === "/login" || pathname === "/signup" || pathname.startsWith("/signup/"))) {
     return NextResponse.redirect(new URL(homeFor(session.roles, session.activeRole), request.url));
   }
 

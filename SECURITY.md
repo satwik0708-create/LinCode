@@ -27,8 +27,8 @@ the steps to reproduce it. Do not include working credentials or personal data i
 | Datastore | JSON file under `DATA_DIR`, single process | A real database with row-level access rules; reimplement `src/lib/data/store.ts` |
 | Rate limiting | In-memory, per instance | Redis or an edge rate limiter, so limits hold across instances |
 | OTP / reset delivery | Logged to the server console | A real SMS and transactional email provider |
-| Document storage | Metadata only; `GET /api/documents/[id]` returns an authorised descriptor | Stream from object storage **after** the same `canReadDocument` check, with signed short-lived URLs |
-| Upload validation | Not implemented — no upload endpoint exists yet | Enforce content-type allow-lists, size caps, extension checks and malware scanning before anything is stored |
+| Document storage | Files on local disk under `DATA_DIR/uploads`, served by `GET /api/documents/[id]/content` after the `canReadDocument` check | Object storage, read **after** the same check, with signed short-lived URLs |
+| Upload validation | Content-type allow-list (PDF/PNG/JPEG), magic-byte check, 5 MB cap, generated storage key | Add malware scanning, and serve user files from a separate origin so a stored file can never inherit the app's origin |
 | Email/mobile verification | Accounts are usable before verification | Require verification before applying or being surfaced to recruiters |
 | Session revocation | Stateless tokens expire naturally | A revocation list or short-lived tokens with refresh, so a sign-out or role change invalidates immediately |
 | Audit log | Bounded in-process array | Append-only storage outside the application, with alerting on repeated denials |
@@ -42,5 +42,11 @@ the steps to reproduce it. Do not include working credentials or personal data i
 - **Recruiters see a projection, not a student.** `getApplicants` returns only the fields a
   recruiter needs. A student's learning history, streak and other applications are never
   included in that payload.
+- **An uploaded file never names its own path.** The storage key is generated, validated
+  against `^[0-9a-f]{32}\.[a-z]{3}$` before any filesystem call, and the uploader's filename is
+  kept as display metadata only.
+- **Verification access is scoped to the review, not the role.** An institution can read a
+  student's certificate only while that certificate is the evidence behind a claim awaiting its
+  verdict; the grant lapses the moment the claim leaves the queue.
 - **Institutions are scoped by `institutionId`** taken from the authenticated user's own record.
   No request parameter can widen that scope.

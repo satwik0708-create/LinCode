@@ -71,6 +71,83 @@ test("an institution cannot read a student's private certificate", async () => {
   assert.equal(verdict.allowed, false);
 });
 
+test("an institution may read a certificate only while it is evidence it must review", async () => {
+  // doc_cert_sql backs cert_3, which is pending review by inst_gcet.
+  const during = await portfolio.canReadDocument("doc_cert_sql", {
+    id: "usr_cdc", role: "institution", institutionId: "inst_gcet",
+  });
+  assert.equal(during.allowed, true, "the reviewer must be able to open the evidence");
+
+  // A different institution never gets in, review or not.
+  const outsider = await portfolio.canReadDocument("doc_cert_sql", {
+    id: "usr_other", role: "institution", institutionId: "inst_svnit",
+  });
+  assert.equal(outsider.allowed, false);
+
+  await portfolio.reviewCertification({
+    certificationId: "cert_3", reviewerId: "usr_cdc",
+    reviewerInstitutionId: "inst_gcet", approve: true,
+  });
+
+  const after = await portfolio.canReadDocument("doc_cert_sql", {
+    id: "usr_cdc", role: "institution", institutionId: "inst_gcet",
+  });
+  assert.equal(after.allowed, false, "the grant must lapse once the claim leaves the queue");
+});
+
+test("only the student's own institution can rule on their certification", async () => {
+  const cert = await portfolio.addCertification({
+    userId: "usr_priya", name: "Kubernetes Administrator", issuer: "CNCF",
+    issuedOn: new Date().toISOString(), skillIds: [], documentId: "doc_cert_sql",
+  });
+  assert.equal(cert.verificationStatus, "pending", "evidence puts a claim in the queue");
+
+  const foreign = await portfolio.reviewCertification({
+    certificationId: cert.id, reviewerId: "usr_other",
+    reviewerInstitutionId: "inst_svnit", approve: true,
+  });
+  assert.equal(foreign, null);
+
+  const rejected = await portfolio.reviewCertification({
+    certificationId: cert.id, reviewerId: "usr_cdc",
+    reviewerInstitutionId: "inst_gcet", approve: false, note: "Issuer could not be confirmed.",
+  });
+  assert.equal(rejected?.verified, false);
+  assert.equal(rejected?.verificationStatus, "rejected");
+
+  // A verdict is final until the student resubmits — no double review.
+  const again = await portfolio.reviewCertification({
+    certificationId: cert.id, reviewerId: "usr_cdc",
+    reviewerInstitutionId: "inst_gcet", approve: true,
+  });
+  assert.equal(again, null);
+});
+
+test("a certification with no evidence never enters the review queue", async () => {
+  const cert = await portfolio.addCertification({
+    userId: "usr_priya", name: "Self-study: Rust", issuer: "Independent",
+    issuedOn: new Date().toISOString(), skillIds: [],
+  });
+  assert.equal(cert.verificationStatus, "unverified");
+  const queue = await portfolio.listPendingCertifications("inst_gcet");
+  assert.ok(queue.every((entry) => entry.certification.id !== cert.id));
+});
+
+test("the review queue only shows this institution's own students", async () => {
+  const mine = await portfolio.addCertification({
+    userId: "usr_priya", name: "Terraform Associate", issuer: "HashiCorp",
+    issuedOn: new Date().toISOString(), skillIds: [], documentId: "doc_cert_sql",
+  });
+  const theirs = await portfolio.addCertification({
+    userId: "usr_kavya", name: "Burp Suite Practitioner", issuer: "PortSwigger",
+    issuedOn: new Date().toISOString(), skillIds: [], documentId: "doc_3",
+  });
+
+  const gcet = await portfolio.listPendingCertifications("inst_gcet");
+  assert.ok(gcet.some((entry) => entry.certification.id === mine.id), "Priya is enrolled at GCET");
+  assert.ok(gcet.every((entry) => entry.certification.id !== theirs.id), "Kavya is enrolled at SVNIT");
+});
+
 test("a missing document is reported the same way as a forbidden one at the route", async () => {
   const verdict = await portfolio.canReadDocument("doc_does_not_exist", { id: "usr_priya", role: "student" });
   assert.equal(verdict.allowed, false);
@@ -135,6 +212,98 @@ test("applicant listings are scoped to the employer's own postings", async () =>
   assert.ok(axiom.every((a) => a.opportunityId === "opp_secanalyst"));
 });
 
+test("a training programme is published under the recruiter's own organisation", async () => {
+  const program = await opportunities.createTrainingProgram({
+    organizationId: "org_nimbus",
+    postedByUserId: "usr_recruiter",
+    title: "Kubernetes in Production",
+    description: "Six weeks of live cluster work.",
+    kind: "certification",
+    domainIds: ["cloud"],
+    skillIds: ["cloud_kubernetes"],
+    level: "intermediate",
+    durationWeeks: 6,
+    mode: "cohort",
+    certificateOffered: true,
+    seats: 60,
+    startsOn: new Date().toISOString(),
+    status: "open",
+  });
+
+  // Another employer's programme listing must not include it.
+  const axiom = await opportunities.listTrainingPrograms({ organizationId: "org_axiom" });
+  assert.ok(axiom.every((t) => t.id !== program.id));
+  const nimbus = await opportunities.listTrainingPrograms({ organizationId: "org_nimbus" });
+  assert.ok(nimbus.some((t) => t.id === program.id));
+});
+
+test("enrolling in a training programme is idempotent and refuses closed ones", async () => {
+  const open = await opportunities.createTrainingProgram({
+    organizationId: "org_nimbus", postedByUserId: "usr_recruiter",
+    title: "Observability Clinic", description: "Two weeks on tracing and SLOs.",
+    kind: "workshop", domainIds: ["cloud"], skillIds: ["cloud_observability"],
+    level: "intermediate", durationWeeks: 2, mode: "live", certificateOffered: false,
+    seats: 30, startsOn: new Date().toISOString(), status: "open",
+  });
+  const closed = await opportunities.createTrainingProgram({
+    organizationId: "org_nimbus", postedByUserId: "usr_recruiter",
+    title: "Retired Track", description: "No longer running for new cohorts.",
+    kind: "training", domainIds: ["cloud"], skillIds: ["cloud_cicd"],
+    level: "beginner", durationWeeks: 1, mode: "self_paced", certificateOffered: false,
+    seats: 10, startsOn: new Date().toISOString(), status: "closed",
+  });
+
+  const first = await opportunities.enrollInTraining("usr_priya", open.id);
+  const second = await opportunities.enrollInTraining("usr_priya", open.id);
+  assert.ok(first);
+  assert.equal(second?.id, first?.id, "enrolling twice must not create a second seat");
+  assert.equal(await opportunities.enrollInTraining("usr_priya", closed.id), null);
+});
+
+test("a module checkpoint is evidence, not a re-placement", async () => {
+  const before = (await users.getStudentProfile("usr_priya"))!;
+  const enrolment = before.enrollments.find((e) => e.domainId === "fullstack")!;
+  const placedBefore = enrolment.placedLevel;
+  const htmlBefore = before.skillMatrix.html?.score ?? 0;
+
+  const quiz = await learning.createModuleQuiz("usr_priya", "fullstack", "fs-html", ["html"], "beginner");
+  assert.ok(quiz.questionIds.length > 0, "the checkpoint must have questions to be worth anything");
+
+  // Answer everything wrong.
+  const result = await learning.gradeAssessment(quiz, {});
+  assert.equal(result.scorePercent, 0);
+  assert.equal(result.moduleId, "fs-html");
+
+  const after = (await users.getStudentProfile("usr_priya"))!;
+  assert.equal(
+    after.enrollments.find((e) => e.domainId === "fullstack")!.placedLevel,
+    placedBefore,
+    "a short checkpoint must not re-place the learner",
+  );
+  // The score moves toward the new evidence without being replaced by it.
+  const htmlAfter = after.skillMatrix.html?.score ?? 0;
+  assert.ok(htmlAfter < htmlBefore, "failing the checkpoint must lower the skill");
+  assert.ok(htmlAfter > 0, "one wrong question must not erase a diagnostic's evidence");
+});
+
+test("registering under an existing institution's name cannot rewrite its record", async () => {
+  const { read } = await import("../src/lib/data/store");
+  const original = (await read()).institutions.find((i) => i.id === "inst_gcet")!;
+  const originalCity = original.city;
+  const originalType = original.type;
+
+  const id = await users.registerInstitution({
+    name: "Government College of Engineering, Pune",
+    type: "deemed", city: "Nowhere", state: "Nowhere",
+    website: "https://impostor.example", accreditation: "Self-declared A++",
+  });
+  assert.equal(id, "inst_gcet", "the same name must attach to the existing record");
+
+  const after = (await read()).institutions.find((i) => i.id === "inst_gcet")!;
+  assert.equal(after.city, originalCity, "an existing field must not be overwritten");
+  assert.equal(after.type, originalType);
+});
+
 test("enrolling in more domains never removes the existing ones", async () => {
   const before = (await users.getStudentProfile("usr_priya"))!.enrollments.map((e) => e.domainId);
   assert.ok(before.includes("fullstack"));
@@ -175,7 +344,9 @@ test("grading happens server-side and folds into the skill matrix", async () => 
 
   const result = await learning.gradeAssessment(assessment, perfect);
   assert.equal(result.scorePercent, 100);
-  assert.equal(result.placedLevel, "advanced");
+  // Declared intermediate, so the ceiling is the intermediate track however
+  // well the paper is answered.
+  assert.equal(result.placedLevel, "intermediate");
 
   const profile = await users.getStudentProfile("usr_arjun");
   assert.ok(Object.keys(result.skillScores).length > 0);

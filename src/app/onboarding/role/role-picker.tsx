@@ -2,48 +2,12 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Briefcase, Building2, Check, GraduationCap, Loader2, Users } from "lucide-react";
+import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormAlert } from "@/components/auth/form-field";
 import { postJson } from "@/lib/client";
+import { ROLE_CARDS, type SelectableRole } from "@/components/auth/role-cards";
 import { cn } from "@/lib/utils";
-
-type SelectableRole = "student" | "faculty" | "industry" | "institution";
-
-const ROLE_CARDS: Array<{
-  value: SelectableRole;
-  emoji: string;
-  icon: typeof GraduationCap;
-  title: string;
-  description: string;
-  bullets: string[];
-  gradient: string;
-}> = [
-  {
-    value: "student", emoji: "🎓", icon: GraduationCap, title: "Student",
-    description: "For students looking to develop skills, find internships, and become placement-ready.",
-    bullets: ["Skill assessment & gap analysis", "Personalised learning paths", "Internships, jobs and a verified portfolio"],
-    gradient: "from-indigo-500 to-violet-500",
-  },
-  {
-    value: "faculty", emoji: "🏛", icon: Users, title: "Faculty / Academician",
-    description: "For faculty internships, FDPs, industrial training, consultancy and research collaboration.",
-    bullets: ["Faculty internships & industrial training", "Faculty Development Programmes", "Consultancy and joint research"],
-    gradient: "from-emerald-500 to-teal-500",
-  },
-  {
-    value: "industry", emoji: "💼", icon: Briefcase, title: "Industry / Recruiter",
-    description: "For internships, jobs, projects, training programmes and recruitment.",
-    bullets: ["Post roles with the exact skills you need", "Discover candidates by skill compatibility", "Run training and mentorship programmes"],
-    gradient: "from-sky-500 to-cyan-500",
-  },
-  {
-    value: "institution", emoji: "🏢", icon: Building2, title: "Institution",
-    description: "For monitoring students, skill development, internships, placements and analytics.",
-    bullets: ["Cohort skill development dashboards", "Internship and placement tracking", "Department-level gap analytics"],
-    gradient: "from-amber-500 to-orange-500",
-  },
-];
 
 export function RolePicker({ name }: { name: string }) {
   const router = useRouter();

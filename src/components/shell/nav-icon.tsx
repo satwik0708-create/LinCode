@@ -3,14 +3,14 @@
 import {
   BookOpen, Boxes, Briefcase, Building2, ClipboardCheck, Circle, Factory, Flame,
   FlaskConical, FolderOpen, GraduationCap, Handshake, LayoutDashboard, LineChart,
-  ListChecks, ScrollText, Settings, Sparkles, Target, User, Users,
+  ListChecks, ScrollText, Settings, ShieldCheck, Sparkles, Target, User, Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ICONS = {
   BookOpen, Boxes, Briefcase, Building2, ClipboardCheck, Factory, Flame, FlaskConical,
   FolderOpen, GraduationCap, Handshake, LayoutDashboard, LineChart, ListChecks,
-  ScrollText, Settings, Sparkles, Target, User, Users,
+  ScrollText, Settings, ShieldCheck, Sparkles, Target, User, Users,
 } as const;
 
 export function NavIcon({ name, className }: { name: string; className?: string }) {
