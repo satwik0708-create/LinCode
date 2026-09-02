@@ -71,6 +71,83 @@ test("an institution cannot read a student's private certificate", async () => {
   assert.equal(verdict.allowed, false);
 });
 
+test("an institution may read a certificate only while it is evidence it must review", async () => {
+  // doc_cert_sql backs cert_3, which is pending review by inst_gcet.
+  const during = await portfolio.canReadDocument("doc_cert_sql", {
+    id: "usr_cdc", role: "institution", institutionId: "inst_gcet",
+  });
+  assert.equal(during.allowed, true, "the reviewer must be able to open the evidence");
+
+  // A different institution never gets in, review or not.
+  const outsider = await portfolio.canReadDocument("doc_cert_sql", {
+    id: "usr_other", role: "institution", institutionId: "inst_svnit",
+  });
+  assert.equal(outsider.allowed, false);
+
+  await portfolio.reviewCertification({
+    certificationId: "cert_3", reviewerId: "usr_cdc",
+    reviewerInstitutionId: "inst_gcet", approve: true,
+  });
+
+  const after = await portfolio.canReadDocument("doc_cert_sql", {
+    id: "usr_cdc", role: "institution", institutionId: "inst_gcet",
+  });
+  assert.equal(after.allowed, false, "the grant must lapse once the claim leaves the queue");
+});
+
+test("only the student's own institution can rule on their certification", async () => {
+  const cert = await portfolio.addCertification({
+    userId: "usr_priya", name: "Kubernetes Administrator", issuer: "CNCF",
+    issuedOn: new Date().toISOString(), skillIds: [], documentId: "doc_cert_sql",
+  });
+  assert.equal(cert.verificationStatus, "pending", "evidence puts a claim in the queue");
+
+  const foreign = await portfolio.reviewCertification({
+    certificationId: cert.id, reviewerId: "usr_other",
+    reviewerInstitutionId: "inst_svnit", approve: true,
+  });
+  assert.equal(foreign, null);
+
+  const rejected = await portfolio.reviewCertification({
+    certificationId: cert.id, reviewerId: "usr_cdc",
+    reviewerInstitutionId: "inst_gcet", approve: false, note: "Issuer could not be confirmed.",
+  });
+  assert.equal(rejected?.verified, false);
+  assert.equal(rejected?.verificationStatus, "rejected");
+
+  // A verdict is final until the student resubmits — no double review.
+  const again = await portfolio.reviewCertification({
+    certificationId: cert.id, reviewerId: "usr_cdc",
+    reviewerInstitutionId: "inst_gcet", approve: true,
+  });
+  assert.equal(again, null);
+});
+
+test("a certification with no evidence never enters the review queue", async () => {
+  const cert = await portfolio.addCertification({
+    userId: "usr_priya", name: "Self-study: Rust", issuer: "Independent",
+    issuedOn: new Date().toISOString(), skillIds: [],
+  });
+  assert.equal(cert.verificationStatus, "unverified");
+  const queue = await portfolio.listPendingCertifications("inst_gcet");
+  assert.ok(queue.every((entry) => entry.certification.id !== cert.id));
+});
+
+test("the review queue only shows this institution's own students", async () => {
+  const mine = await portfolio.addCertification({
+    userId: "usr_priya", name: "Terraform Associate", issuer: "HashiCorp",
+    issuedOn: new Date().toISOString(), skillIds: [], documentId: "doc_cert_sql",
+  });
+  const theirs = await portfolio.addCertification({
+    userId: "usr_kavya", name: "Burp Suite Practitioner", issuer: "PortSwigger",
+    issuedOn: new Date().toISOString(), skillIds: [], documentId: "doc_3",
+  });
+
+  const gcet = await portfolio.listPendingCertifications("inst_gcet");
+  assert.ok(gcet.some((entry) => entry.certification.id === mine.id), "Priya is enrolled at GCET");
+  assert.ok(gcet.every((entry) => entry.certification.id !== theirs.id), "Kavya is enrolled at SVNIT");
+});
+
 test("a missing document is reported the same way as a forbidden one at the route", async () => {
   const verdict = await portfolio.canReadDocument("doc_does_not_exist", { id: "usr_priya", role: "student" });
   assert.equal(verdict.allowed, false);

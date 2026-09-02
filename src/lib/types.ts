@@ -396,6 +396,13 @@ export interface LearningStreak {
 /* Portfolio                                                           */
 /* ------------------------------------------------------------------ */
 
+/**
+ * `verified` is the claim's outcome; `verificationStatus` is where it is in the
+ * review. A certificate with no evidence attached stays "unverified" — nobody
+ * is asked to rubber-stamp a bare assertion.
+ */
+export type VerificationStatus = "unverified" | "pending" | "verified" | "rejected";
+
 export interface Certification {
   id: string;
   userId: string;
@@ -407,6 +414,13 @@ export interface Certification {
   skillIds: string[];
   verified: boolean;
   verifiedBy?: string;
+  verificationStatus: VerificationStatus;
+  /** Uploaded certificate backing the claim, read only through the documents route. */
+  documentId?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
+  /** Reviewer's note, shown to the student — the reason a claim was rejected. */
+  reviewNote?: string;
 }
 
 export interface PortfolioProject {

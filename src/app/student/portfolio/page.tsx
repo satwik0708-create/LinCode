@@ -4,7 +4,7 @@ import { getStudentProfile } from "@/lib/data/users";
 import { getPortfolio } from "@/lib/data/portfolio";
 import { listApplicationsForStudent } from "@/lib/data/opportunities";
 import { read } from "@/lib/data/store";
-import { skillName } from "@/lib/domain/skills";
+import { SKILLS, skillName } from "@/lib/domain/skills";
 import { getDomainSnapshots } from "@/lib/services/student";
 import { PageHeader } from "@/components/shell/page-header";
 import { PortfolioWorkspace } from "./portfolio-workspace";
@@ -50,6 +50,12 @@ export default async function PortfolioPage() {
     }))
     .sort((a, b) => b.score - a.score);
 
+  // Only skills from the domains they are enrolled in — the whole taxonomy
+  // would be a wall of chips that mostly do not apply to them.
+  const enrolledDomains = new Set(snapshots.map((s) => s.enrollment.domainId));
+  const certifiableSkills = SKILLS.filter((skill) => skill.domainIds.some((d) => enrolledDomains.has(d)))
+    .map((skill) => ({ id: skill.id, name: skill.name }));
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -78,6 +84,7 @@ export default async function PortfolioPage() {
           id: d.id, kind: d.kind, filename: d.filename, sizeBytes: d.sizeBytes, uploadedAt: d.uploadedAt,
         }))}
         internships={internships}
+        certifiableSkills={certifiableSkills}
         domains={snapshots.map((s) => ({
           id: s.enrollment.domainId,
           name: s.domainName,

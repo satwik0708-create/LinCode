@@ -112,6 +112,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
         { href: "/institution/internships", label: "Internships", icon: "Briefcase" },
         { href: "/institution/placements", label: "Placements", icon: "Building2" },
         { href: "/institution/analytics", label: "Analytics", icon: "LineChart" },
+        { href: "/institution/verifications", label: "Verifications", icon: "ShieldCheck" },
       ],
     },
     {

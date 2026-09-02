@@ -1,6 +1,7 @@
 import "server-only";
 import { emptyDatabase, type Database } from "./store";
 import { hashPassword } from "@/lib/auth/password";
+import { writeUpload } from "./uploads";
 import { MODULES } from "@/lib/domain/curriculum";
 import { computeDomainCompletion } from "@/lib/domain/completion";
 import type {
@@ -17,6 +18,26 @@ import type {
  */
 
 const DEMO_PASSWORD = "Demo@Skill2025";
+
+/**
+ * A minimal one-page PDF, written to the upload store so the seeded review
+ * queue opens a real file rather than a dead link.
+ */
+const SAMPLE_CERTIFICATE_KEY = "0f1e2d3c4b5a69788796a5b4c3d2e1f0.pdf";
+const SAMPLE_CERTIFICATE_PDF = new TextEncoder().encode(
+  [
+    "%PDF-1.4",
+    "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj",
+    "2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj",
+    "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 420 300]/Resources<</Font<</F1 4 0 R>>>>/Contents 5 0 R>>endobj",
+    "4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj",
+    "5 0 obj<</Length 92>>stream",
+    "BT /F1 18 Tf 40 200 Td (SQL for Data Analysis) Tj 0 -30 Td /F1 12 Tf (Nimbus Academy) Tj ET",
+    "endstream endobj",
+    "trailer<</Root 1 0 R>>",
+    "%%EOF",
+  ].join("\n"),
+);
 
 function daysAgo(n: number): string {
   return new Date(Date.now() - n * 86_400_000).toISOString();
@@ -248,10 +269,10 @@ export async function buildSeedDatabase(): Promise<Database> {
   /* ---------------- Portfolio ---------------- */
 
   const certs: Certification[] = [
-    { id: "cert_1", userId: priya.id, name: "Data Science Professional Certificate", issuer: "Finlytic Analytics", issuedOn: daysAgo(14), credentialId: "FIN-DS-4821", credentialUrl: "https://finlytic.example.com/verify/FIN-DS-4821", skillIds: ["stats", "sql-analytics", "data-viz"], verified: true, verifiedBy: "org_finlytic" },
-    { id: "cert_2", userId: priya.id, name: "Responsive Web Design", issuer: "freeCodeCamp", issuedOn: daysAgo(210), credentialUrl: "https://www.freecodecamp.org/certification", skillIds: ["html", "css"], verified: true, verifiedBy: "inst_gcet" },
-    { id: "cert_3", userId: priya.id, name: "SQL for Data Analysis", issuer: "Nimbus Academy", issuedOn: daysAgo(95), skillIds: ["sql-analytics", "databases"], verified: false },
-    { id: "cert_4", userId: kavya.id, name: "Web Application Security Practitioner", issuer: "Axiom Security Labs", issuedOn: daysAgo(40), skillIds: ["web-security", "secure-coding"], verified: true, verifiedBy: "org_axiom" },
+    { id: "cert_1", userId: priya.id, name: "Data Science Professional Certificate", issuer: "Finlytic Analytics", issuedOn: daysAgo(14), credentialId: "FIN-DS-4821", credentialUrl: "https://finlytic.example.com/verify/FIN-DS-4821", skillIds: ["stats", "sql-analytics", "data-viz"], verified: true, verifiedBy: "org_finlytic", verificationStatus: "verified", reviewedAt: daysAgo(12) },
+    { id: "cert_2", userId: priya.id, name: "Responsive Web Design", issuer: "freeCodeCamp", issuedOn: daysAgo(210), credentialUrl: "https://www.freecodecamp.org/certification", skillIds: ["html", "css"], verified: true, verifiedBy: "inst_gcet", verificationStatus: "verified", reviewedAt: daysAgo(200) },
+    { id: "cert_3", userId: priya.id, name: "SQL for Data Analysis", issuer: "Nimbus Academy", issuedOn: daysAgo(95), skillIds: ["sql-analytics", "databases"], verified: false, verificationStatus: "pending", documentId: "doc_cert_sql", submittedAt: daysAgo(3) },
+    { id: "cert_4", userId: kavya.id, name: "Web Application Security Practitioner", issuer: "Axiom Security Labs", issuedOn: daysAgo(40), skillIds: ["web-security", "secure-coding"], verified: true, verifiedBy: "org_axiom", verificationStatus: "verified", reviewedAt: daysAgo(35) },
   ];
   db.certifications = certs;
 
@@ -274,10 +295,15 @@ export async function buildSeedDatabase(): Promise<Database> {
     { id: "acad_3", userId: priya.id, term: "Semester 3", gpa: 8.4, credits: 22, highlights: ["Discrete Mathematics — A"], verifiedByInstitution: true },
   ];
 
+  await writeUpload(SAMPLE_CERTIFICATE_KEY, SAMPLE_CERTIFICATE_PDF);
   db.documents = [
     { id: "doc_1", ownerId: priya.id, kind: "resume", filename: "priya-sharma-resume.pdf", mimeType: "application/pdf", sizeBytes: 184_320, storageKey: "resumes/usr_priya/current.pdf", uploadedAt: daysAgo(9), sharedWith: [] },
     { id: "doc_2", ownerId: priya.id, kind: "certificate", filename: "finlytic-ds-certificate.pdf", mimeType: "application/pdf", sizeBytes: 96_400, storageKey: "certificates/usr_priya/fin-ds-4821.pdf", uploadedAt: daysAgo(14), sharedWith: [] },
     { id: "doc_3", ownerId: kavya.id, kind: "resume", filename: "kavya-reddy-resume.pdf", mimeType: "application/pdf", sizeBytes: 172_100, storageKey: "resumes/usr_kavya/current.pdf", uploadedAt: daysAgo(20), sharedWith: [] },
+    // Evidence behind cert_3, which is waiting on the institution's review. The
+    // other fixtures carry metadata only; this one has real bytes on disk so the
+    // review queue can actually open something.
+    { id: "doc_cert_sql", ownerId: priya.id, kind: "certificate", filename: "nimbus-sql-certificate.pdf", mimeType: "application/pdf", sizeBytes: SAMPLE_CERTIFICATE_PDF.byteLength, storageKey: SAMPLE_CERTIFICATE_KEY, uploadedAt: daysAgo(3), sharedWith: [] },
   ];
 
   /* ---------------- Opportunities ---------------- */

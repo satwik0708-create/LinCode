@@ -247,6 +247,22 @@ export const enrollTrainingSchema = z.object({
   programId: z.string().trim().min(4).max(64),
 });
 
+export const addCertificationSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  issuer: z.string().trim().min(2).max(120),
+  issuedOn: z.string().trim().min(8).max(40),
+  credentialId: z.string().trim().max(80).optional(),
+  credentialUrl: z.union([z.url(), z.literal("")]).optional(),
+  skillIds: z.array(z.string().trim().max(60)).max(20).default([]),
+  documentId: z.string().trim().min(4).max(64).optional(),
+});
+
+export const reviewCertificationSchema = z.object({
+  certificationId: z.string().trim().min(4).max(64),
+  approve: z.boolean(),
+  note: z.string().trim().max(400).optional(),
+});
+
 export const advisorSchema = z.object({
   question: z.string().trim().min(3, "Ask a question.").max(500),
   domainId: domainIdSchema.optional(),
