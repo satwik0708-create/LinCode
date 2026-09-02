@@ -5,6 +5,7 @@ import { listApplicationsForStudent, listOpportunities } from "@/lib/data/opport
 import { getPortfolio } from "@/lib/data/portfolio";
 import { MODULES } from "@/lib/domain/curriculum";
 import { getDomain } from "@/lib/domain/domains";
+import { skillName } from "@/lib/domain/skills";
 import { getSkillEngine, type EngineContext, type OpportunityMatch } from "@/lib/ai";
 import type {
   Application, DomainEnrollment, LearningLevel, LearningPath, Opportunity,
@@ -176,4 +177,33 @@ export async function getStudentOverview(userId: string): Promise<StudentOvervie
     },
     readiness: primaryGap?.readinessScore ?? 0,
   };
+}
+
+/** Shape a stored path into what the learning-path UI renders. */
+export async function getPathView(userId: string, domainId: string) {
+  const [path, progress] = await Promise.all([getOrCreatePath(userId, domainId), listProgress(userId, domainId)]);
+  if (!path) return null;
+
+  const completed = new Set(progress.filter((p) => p.status === "completed").map((p) => p.moduleId));
+
+  const steps = path.steps
+    .map((step) => {
+      const mod = MODULES.find((m) => m.id === step.moduleId);
+      if (!mod) return null;
+      return {
+        moduleId: mod.id,
+        title: mod.title,
+        summary: mod.summary,
+        level: mod.level,
+        estimatedMinutes: mod.estimatedMinutes,
+        skills: mod.skillIds.map((id) => skillName(id)),
+        status: step.status,
+        rationale: step.rationale,
+        completed: completed.has(mod.id),
+        resources: mod.resources,
+      };
+    })
+    .filter((s): s is NonNullable<typeof s> => s !== null);
+
+  return { path, steps };
 }
