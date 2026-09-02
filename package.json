@@ -2,14 +2,14 @@
   "name": "skillbridge",
   "version": "0.1.0",
   "private": true,
-  "description": "SkillBridge — skill assessment, personalized learning, internships and placements platform",
+  "description": "SkillBridge \u2014 skill assessment, personalized learning, internships and placements platform",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src tests",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "tsx --conditions=react-server --test tests/*.test.ts",
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
@@ -32,12 +32,13 @@
     "next": "15.5.25",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "recharts": "^2.15.4",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.1.5"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@types/node": "^22.15.30",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",

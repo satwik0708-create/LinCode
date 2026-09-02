@@ -86,10 +86,12 @@ export async function buildSeedDatabase(): Promise<Database> {
   const faculty = mk("usr_faculty", "Dr. Rohan Iyer", "faculty@demo.edu", "+919812345010", ["faculty"], "faculty", { institutionId: "inst_gcet" });
   const recruiter = mk("usr_recruiter", "Neha Kulkarni", "recruiter@nimbus.demo", "+919812345020", ["industry"], "industry", { organizationId: "org_nimbus" });
   const recruiter2 = mk("usr_recruiter2", "Sameer Joshi", "recruiter@axiom.demo", "+919812345021", ["industry"], "industry", { organizationId: "org_axiom" });
+  const recruiter3 = mk("usr_recruiter3", "Meera Nair", "recruiter@vertex.demo", "+919812345022", ["industry"], "industry", { organizationId: "org_vertex" });
+  const recruiter4 = mk("usr_recruiter4", "Vikram Rao", "recruiter@finlytic.demo", "+919812345023", ["industry"], "industry", { organizationId: "org_finlytic" });
   const cdc = mk("usr_cdc", "Anita Deshpande", "cdc@demo.edu", "+919812345030", ["institution"], "institution", { institutionId: "inst_gcet" });
   const admin = mk("usr_admin", "Platform Administrator", "admin@skillbridge.demo", "+919812345040", ["admin", "institution"], "admin");
 
-  db.users = [priya, arjun, kavya, faculty, recruiter, recruiter2, cdc, admin];
+  db.users = [priya, arjun, kavya, faculty, recruiter, recruiter2, recruiter3, recruiter4, cdc, admin];
 
   /* ---------------- Profiles ---------------- */
 
@@ -174,6 +176,8 @@ export async function buildSeedDatabase(): Promise<Database> {
   db.industryProfiles = [
     { userId: recruiter.id, organizationId: "org_nimbus", companyName: "Nimbus Cloud Systems", designation: "Talent Lead — Engineering", industrySector: "Cloud & Infrastructure", companySize: "1000-5000", website: "https://nimbus.example.com", hiringFor: ["Cloud Engineer", "Full Stack Engineer", "SRE"], updatedAt: daysAgo(15) },
     { userId: recruiter2.id, organizationId: "org_axiom", companyName: "Axiom Security Labs", designation: "Head of Talent", industrySector: "Cybersecurity", companySize: "50-200", website: "https://axiomlabs.example.com", hiringFor: ["Security Analyst", "AppSec Engineer"], updatedAt: daysAgo(18) },
+    { userId: recruiter3.id, organizationId: "org_vertex", companyName: "Vertex Product Studio", designation: "Engineering Manager", industrySector: "Product Engineering", companySize: "200-1000", website: "https://vertexstudio.example.com", hiringFor: ["Frontend Developer", "Full Stack Engineer", "Product Engineer"], updatedAt: daysAgo(14) },
+    { userId: recruiter4.id, organizationId: "org_finlytic", companyName: "Finlytic Analytics", designation: "Head of Early Careers", industrySector: "FinTech & Analytics", companySize: "200-1000", website: "https://finlytic.example.com", hiringFor: ["Data Analyst", "Data Scientist", "ML Engineer"], updatedAt: daysAgo(12) },
   ];
 
   db.institutionProfiles = [
@@ -263,7 +267,7 @@ export async function buildSeedDatabase(): Promise<Database> {
 
   const opportunities: Opportunity[] = [
     {
-      id: "opp_frontend_intern", type: "internship", organizationId: "org_vertex", postedByUserId: recruiter.id,
+      id: "opp_frontend_intern", type: "internship", organizationId: "org_vertex", postedByUserId: recruiter3.id,
       title: "Frontend Developer Intern", location: "Remote (India)", workMode: "remote",
       description: "Work alongside our product team building customer-facing interfaces in React and TypeScript. You will own real features behind flags, from design handoff to production.",
       stipend: "₹25,000/month", durationMonths: 6, domainIds: ["fullstack"],
@@ -281,7 +285,7 @@ export async function buildSeedDatabase(): Promise<Database> {
       openings: 6, deadline: daysAhead(25), status: "open", createdAt: daysAgo(7),
     },
     {
-      id: "opp_data_analyst", type: "job", organizationId: "org_finlytic", postedByUserId: recruiter.id,
+      id: "opp_data_analyst", type: "job", organizationId: "org_finlytic", postedByUserId: recruiter4.id,
       title: "Data Analyst (Graduate)", location: "Hyderabad", workMode: "onsite",
       description: "Own reporting and experiment analysis for our lending risk products. You will write the SQL, run the tests and present the recommendation yourself.",
       salaryLpa: "₹8–11 LPA", domainIds: ["data-science"],
@@ -308,7 +312,7 @@ export async function buildSeedDatabase(): Promise<Database> {
       openings: 2, deadline: daysAhead(28), status: "open", createdAt: daysAgo(11),
     },
     {
-      id: "opp_ml_apprentice", type: "apprenticeship", organizationId: "org_finlytic", postedByUserId: recruiter.id,
+      id: "opp_ml_apprentice", type: "apprenticeship", organizationId: "org_finlytic", postedByUserId: recruiter4.id,
       title: "Applied ML Apprenticeship", location: "Hyderabad", workMode: "hybrid",
       description: "A 12-month structured apprenticeship: two months of guided training, then production model work on fraud detection with a named mentor.",
       stipend: "₹40,000/month", durationMonths: 12, domainIds: ["ml", "data-science"],
@@ -317,7 +321,7 @@ export async function buildSeedDatabase(): Promise<Database> {
       openings: 4, deadline: daysAhead(35), status: "open", createdAt: daysAgo(5),
     },
     {
-      id: "opp_fullstack_project", type: "project", organizationId: "org_vertex", postedByUserId: recruiter.id,
+      id: "opp_fullstack_project", type: "project", organizationId: "org_vertex", postedByUserId: recruiter3.id,
       title: "Live Project — Accessibility Audit & Rebuild", location: "Remote", workMode: "remote",
       description: "An 8-week paid live project: audit our public site against WCAG 2.2 AA and rebuild the three worst-scoring flows with our design team.",
       stipend: "₹15,000 total", durationMonths: 2, domainIds: ["fullstack"],
@@ -346,9 +350,9 @@ export async function buildSeedDatabase(): Promise<Database> {
       resumeDocumentId: "doc_1", createdAt: daysAgo(16), updatedAt: daysAgo(2),
       timeline: [
         { stage: "applied", at: daysAgo(16), actorId: priya.id },
-        { stage: "under_review", at: daysAgo(13), actorId: recruiter.id, note: "Strong SQL and statistics signals." },
-        { stage: "shortlisted", at: daysAgo(8), actorId: recruiter.id, note: "Shortlisted for the analytics round." },
-        { stage: "interview", at: daysAgo(2), actorId: recruiter.id, note: "Technical interview scheduled." },
+        { stage: "under_review", at: daysAgo(13), actorId: recruiter4.id, note: "Strong SQL and statistics signals." },
+        { stage: "shortlisted", at: daysAgo(8), actorId: recruiter4.id, note: "Shortlisted for the analytics round." },
+        { stage: "interview", at: daysAgo(2), actorId: recruiter4.id, note: "Technical interview scheduled." },
       ],
     },
     {
@@ -356,7 +360,7 @@ export async function buildSeedDatabase(): Promise<Database> {
       resumeDocumentId: "doc_1", createdAt: daysAgo(6), updatedAt: daysAgo(4),
       timeline: [
         { stage: "applied", at: daysAgo(6), actorId: priya.id },
-        { stage: "under_review", at: daysAgo(4), actorId: recruiter.id },
+        { stage: "under_review", at: daysAgo(4), actorId: recruiter3.id },
       ],
     },
     {
@@ -385,6 +389,20 @@ export async function buildSeedDatabase(): Promise<Database> {
       ],
     },
     {
+      id: "app_7", opportunityId: "opp_backend_intern", studentId: priya.id, stage: "applied", matchScore: 61,
+      coverNote: "I've shipped a paginated JSON API in my capstone and want to go deeper on the operational side.",
+      resumeDocumentId: "doc_1", createdAt: daysAgo(4), updatedAt: daysAgo(4),
+      timeline: [{ stage: "applied", at: daysAgo(4), actorId: priya.id }],
+    },
+    {
+      id: "app_8", opportunityId: "opp_sde_grad", studentId: kavya.id, stage: "under_review", matchScore: 68,
+      resumeDocumentId: "doc_3", createdAt: daysAgo(9), updatedAt: daysAgo(6),
+      timeline: [
+        { stage: "applied", at: daysAgo(9), actorId: kavya.id },
+        { stage: "under_review", at: daysAgo(6), actorId: recruiter.id, note: "Strong security fundamentals; checking breadth." },
+      ],
+    },
+    {
       id: "app_6", opportunityId: "opp_backend_intern", studentId: arjun.id, stage: "rejected", matchScore: 44,
       createdAt: daysAgo(22), updatedAt: daysAgo(15),
       timeline: [
@@ -399,23 +417,23 @@ export async function buildSeedDatabase(): Promise<Database> {
   /* ---------------- Industry <-> academia collaboration ---------------- */
 
   db.collaborationPrograms = [
-    { id: "col_fdp_ai", kind: "fdp", organizationId: "org_finlytic", postedByUserId: recruiter.id, title: "FDP: Teaching Applied Machine Learning", description: "A two-week faculty development programme covering an industry-aligned ML curriculum, assessment design and capstone supervision.", audience: ["faculty"], mode: "hybrid", location: "Hyderabad + online", startsOn: daysAhead(30), durationWeeks: 2, seats: 40, stipend: "₹20,000 honorarium", focusAreas: ["Curriculum design", "Applied ML", "Assessment"], deadline: daysAhead(20), status: "open", createdAt: daysAgo(12) },
+    { id: "col_fdp_ai", kind: "fdp", organizationId: "org_finlytic", postedByUserId: recruiter4.id, title: "FDP: Teaching Applied Machine Learning", description: "A two-week faculty development programme covering an industry-aligned ML curriculum, assessment design and capstone supervision.", audience: ["faculty"], mode: "hybrid", location: "Hyderabad + online", startsOn: daysAhead(30), durationWeeks: 2, seats: 40, stipend: "₹20,000 honorarium", focusAreas: ["Curriculum design", "Applied ML", "Assessment"], deadline: daysAhead(20), status: "open", createdAt: daysAgo(12) },
     { id: "col_faculty_intern", kind: "faculty_internship", organizationId: "org_nimbus", postedByUserId: recruiter.id, title: "Faculty Summer Internship — Cloud Platform", description: "Six weeks embedded with our platform engineering team. Return to your department with production experience and a co-designed lab module.", audience: ["faculty"], mode: "onsite", location: "Bengaluru", startsOn: daysAhead(60), durationWeeks: 6, seats: 8, stipend: "₹75,000 total", focusAreas: ["Kubernetes", "Infrastructure as code", "Observability"], deadline: daysAhead(35), status: "open", createdAt: daysAgo(20) },
     { id: "col_consultancy", kind: "consultancy", organizationId: "org_axiom", postedByUserId: recruiter2.id, title: "Consultancy — Secure Code Review Panel", description: "We are building a standing panel of academic reviewers for client security assessments. Paid per engagement, roughly one week per quarter.", audience: ["faculty"], mode: "remote", location: "Remote", startsOn: daysAhead(15), durationWeeks: 12, seats: 6, stipend: "₹60,000 per engagement", focusAreas: ["Application security", "Secure coding", "Threat modelling"], deadline: daysAhead(25), status: "open", createdAt: daysAgo(8) },
-    { id: "col_research", kind: "research", organizationId: "org_finlytic", postedByUserId: recruiter.id, title: "Collaborative Research — Fairness in Credit Scoring", description: "Joint research on bias measurement and mitigation in credit models. Funded, with co-authorship and access to an anonymised dataset.", audience: ["faculty"], mode: "hybrid", location: "Hyderabad + remote", startsOn: daysAhead(45), durationWeeks: 52, seats: 3, stipend: "₹6,00,000 grant", focusAreas: ["Fairness", "Model governance", "Explainability"], deadline: daysAhead(40), status: "open", createdAt: daysAgo(16) },
+    { id: "col_research", kind: "research", organizationId: "org_finlytic", postedByUserId: recruiter4.id, title: "Collaborative Research — Fairness in Credit Scoring", description: "Joint research on bias measurement and mitigation in credit models. Funded, with co-authorship and access to an anonymised dataset.", audience: ["faculty"], mode: "hybrid", location: "Hyderabad + remote", startsOn: daysAhead(45), durationWeeks: 52, seats: 3, stipend: "₹6,00,000 grant", focusAreas: ["Fairness", "Model governance", "Explainability"], deadline: daysAhead(40), status: "open", createdAt: daysAgo(16) },
     { id: "col_training", kind: "industrial_training", organizationId: "org_nimbus", postedByUserId: recruiter.id, title: "Industrial Training — Modern DevOps Toolchain", description: "A one-week intensive for faculty and senior students on the toolchain we actually run in production.", audience: ["faculty", "student"], mode: "onsite", location: "Pune", startsOn: daysAhead(25), durationWeeks: 1, seats: 30, focusAreas: ["CI/CD", "Containers", "Monitoring"], deadline: daysAhead(18), status: "open", createdAt: daysAgo(6) },
     { id: "col_guest", kind: "guest_lecture", organizationId: "org_axiom", postedByUserId: recruiter2.id, title: "Guest Lecture Series — Security in the Real World", description: "Our consultants deliver case-study lectures at partner institutions. Book a slot for your department.", audience: ["faculty", "institution"], mode: "hybrid", location: "Partner campuses", startsOn: daysAhead(10), durationWeeks: 8, seats: 20, focusAreas: ["Incident response", "AppSec", "Career paths"], deadline: daysAhead(30), status: "open", createdAt: daysAgo(9) },
-    { id: "col_hack", kind: "innovation_challenge", organizationId: "org_vertex", postedByUserId: recruiter.id, title: "Innovation Challenge — Accessible Civic Tech", description: "A six-week challenge open to student teams with faculty mentors. Winning teams get a paid live project and mentorship.", audience: ["student", "faculty", "institution"], mode: "remote", location: "Remote", startsOn: daysAhead(20), durationWeeks: 6, seats: 100, stipend: "₹2,00,000 prize pool", focusAreas: ["Accessibility", "Civic technology", "Product design"], deadline: daysAhead(14), status: "open", createdAt: daysAgo(7) },
+    { id: "col_hack", kind: "innovation_challenge", organizationId: "org_vertex", postedByUserId: recruiter3.id, title: "Innovation Challenge — Accessible Civic Tech", description: "A six-week challenge open to student teams with faculty mentors. Winning teams get a paid live project and mentorship.", audience: ["student", "faculty", "institution"], mode: "remote", location: "Remote", startsOn: daysAhead(20), durationWeeks: 6, seats: 100, stipend: "₹2,00,000 prize pool", focusAreas: ["Accessibility", "Civic technology", "Product design"], deadline: daysAhead(14), status: "open", createdAt: daysAgo(7) },
     { id: "col_mentorship", kind: "mentorship", organizationId: "org_nimbus", postedByUserId: recruiter.id, title: "1:1 Engineering Mentorship Cohort", description: "Senior engineers mentor final-year students for one hour a fortnight across a semester.", audience: ["student", "faculty"], mode: "remote", location: "Remote", startsOn: daysAhead(12), durationWeeks: 16, seats: 50, focusAreas: ["Career guidance", "Code review", "System design"], deadline: daysAhead(10), status: "open", createdAt: daysAgo(5) },
-    { id: "col_workshop", kind: "workshop", organizationId: "org_finlytic", postedByUserId: recruiter.id, title: "Workshop — From Notebook to Production", description: "A hands-on day taking a model from a notebook to a monitored endpoint.", audience: ["student", "faculty"], mode: "onsite", location: "Hyderabad", startsOn: daysAhead(18), durationWeeks: 1, seats: 60, focusAreas: ["MLOps", "Deployment", "Monitoring"], deadline: daysAhead(15), status: "open", createdAt: daysAgo(4) },
-    { id: "col_liveproject", kind: "live_project", organizationId: "org_vertex", postedByUserId: recruiter.id, title: "Live Project — Design System Migration", description: "Student teams work on a real migration under our engineering leads, with weekly reviews.", audience: ["student", "faculty"], mode: "remote", location: "Remote", startsOn: daysAhead(22), durationWeeks: 10, seats: 24, stipend: "₹12,000/month", focusAreas: ["React", "Design systems", "Testing"], deadline: daysAhead(16), status: "open", createdAt: daysAgo(3) },
+    { id: "col_workshop", kind: "workshop", organizationId: "org_finlytic", postedByUserId: recruiter4.id, title: "Workshop — From Notebook to Production", description: "A hands-on day taking a model from a notebook to a monitored endpoint.", audience: ["student", "faculty"], mode: "onsite", location: "Hyderabad", startsOn: daysAhead(18), durationWeeks: 1, seats: 60, focusAreas: ["MLOps", "Deployment", "Monitoring"], deadline: daysAhead(15), status: "open", createdAt: daysAgo(4) },
+    { id: "col_liveproject", kind: "live_project", organizationId: "org_vertex", postedByUserId: recruiter3.id, title: "Live Project — Design System Migration", description: "Student teams work on a real migration under our engineering leads, with weekly reviews.", audience: ["student", "faculty"], mode: "remote", location: "Remote", startsOn: daysAhead(22), durationWeeks: 10, seats: 24, stipend: "₹12,000/month", focusAreas: ["React", "Design systems", "Testing"], deadline: daysAhead(16), status: "open", createdAt: daysAgo(3) },
   ];
 
   db.trainingPrograms = [
-    { id: "trn_react", organizationId: "org_vertex", postedByUserId: recruiter.id, title: "Production React — Industry Certification", description: "The React patterns our teams actually use, assessed by a real code review. Certificate is verifiable on your SkillBridge portfolio.", kind: "certification", domainIds: ["fullstack"], skillIds: ["react", "typescript", "testing"], level: "intermediate", durationWeeks: 6, mode: "cohort", certificateOffered: true, seats: 120, startsOn: daysAhead(14), status: "open", createdAt: daysAgo(10) },
+    { id: "trn_react", organizationId: "org_vertex", postedByUserId: recruiter3.id, title: "Production React — Industry Certification", description: "The React patterns our teams actually use, assessed by a real code review. Certificate is verifiable on your SkillBridge portfolio.", kind: "certification", domainIds: ["fullstack"], skillIds: ["react", "typescript", "testing"], level: "intermediate", durationWeeks: 6, mode: "cohort", certificateOffered: true, seats: 120, startsOn: daysAhead(14), status: "open", createdAt: daysAgo(10) },
     { id: "trn_cloud", organizationId: "org_nimbus", postedByUserId: recruiter.id, title: "Cloud Foundations Bootcamp", description: "Four weeks of guided labs on compute, networking, IAM and containers, ending in a graded deployment.", kind: "training", domainIds: ["cloud"], skillIds: ["cloud-core", "containers", "networking", "cloud-security"], level: "beginner", durationWeeks: 4, mode: "cohort", certificateOffered: true, seats: 200, startsOn: daysAhead(9), status: "open", createdAt: daysAgo(15) },
     { id: "trn_appsec", organizationId: "org_axiom", postedByUserId: recruiter2.id, title: "Application Security Essentials", description: "Hands-on OWASP Top 10 with a vulnerable app you exploit and then fix.", kind: "workshop", domainIds: ["cybersecurity"], skillIds: ["web-security", "secure-coding"], level: "intermediate", durationWeeks: 2, mode: "live", certificateOffered: true, seats: 80, startsOn: daysAhead(11), status: "open", createdAt: daysAgo(8) },
-    { id: "trn_ml", organizationId: "org_finlytic", postedByUserId: recruiter.id, title: "Applied ML Mentorship Track", description: "Eight weeks of mentored project work with a practising ML engineer.", kind: "mentorship", domainIds: ["ml", "data-science"], skillIds: ["ml-supervised", "model-eval", "feature-eng"], level: "intermediate", durationWeeks: 8, mode: "cohort", certificateOffered: true, seats: 40, startsOn: daysAhead(20), status: "open", createdAt: daysAgo(6) },
+    { id: "trn_ml", organizationId: "org_finlytic", postedByUserId: recruiter4.id, title: "Applied ML Mentorship Track", description: "Eight weeks of mentored project work with a practising ML engineer.", kind: "mentorship", domainIds: ["ml", "data-science"], skillIds: ["ml-supervised", "model-eval", "feature-eng"], level: "intermediate", durationWeeks: 8, mode: "cohort", certificateOffered: true, seats: 40, startsOn: daysAhead(20), status: "open", createdAt: daysAgo(6) },
   ];
 
   db.programApplications = [
@@ -435,7 +453,8 @@ export async function buildSeedDatabase(): Promise<Database> {
     { id: "ntf_2", userId: priya.id, title: "New match: 84% skill fit", body: "Frontend Developer Intern at Vertex Product Studio matches your Full Stack profile.", kind: "info", href: "/student/internships", read: false, createdAt: daysAgo(3) },
     { id: "ntf_3", userId: priya.id, title: "7-day streak", body: "You have learned seven days in a row. Your longest streak is 19 days.", kind: "success", href: "/student/streak", read: true, createdAt: daysAgo(0) },
     { id: "ntf_4", userId: faculty.id, title: "FDP shortlist", body: "You have been shortlisted for the Applied ML faculty development programme.", kind: "success", href: "/faculty/fdp", read: false, createdAt: daysAgo(4) },
-    { id: "ntf_5", userId: recruiter.id, title: "12 new applicants", body: "Your Backend Engineering Intern posting received 12 applications this week.", kind: "info", href: "/industry/applicants", read: false, createdAt: daysAgo(1) },
+    { id: "ntf_5", userId: recruiter.id, title: "New applicants", body: "Your Backend Engineering Intern posting received new applications this week.", kind: "info", href: "/industry/applicants", read: false, createdAt: daysAgo(1) },
+    { id: "ntf_7", userId: recruiter3.id, title: "New application", body: "Priya Sharma applied to Frontend Developer Intern.", kind: "info", href: "/industry/applicants", read: false, createdAt: daysAgo(6) },
     { id: "ntf_6", userId: cdc.id, title: "Placement readiness up 6%", body: "Department placement readiness improved this month, led by Computer Engineering.", kind: "success", href: "/institution/analytics", read: false, createdAt: daysAgo(2) },
   ];
   db.notifications = notifications;

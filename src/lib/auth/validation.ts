@@ -124,8 +124,21 @@ export const selectDomainsSchema = z.object({
   domainIds: z.array(domainIdSchema).min(1, "Choose at least one learning domain.").max(5),
 });
 
+/**
+ * Levels are set per selected domain, so this map is deliberately partial —
+ * a student enrolled in three of the five domains sends three entries. Keys are
+ * validated against the domain catalogue explicitly rather than through an enum
+ * key type, which would demand every domain be present.
+ */
 export const setLevelsSchema = z.object({
-  levels: z.record(domainIdSchema, levelSchema),
+  levels: z
+    .record(z.string().trim().min(1).max(40), levelSchema)
+    .refine((value) => Object.keys(value).every((key) => (DOMAIN_IDS as string[]).includes(key)), {
+      message: "Unknown learning domain.",
+    })
+    .refine((value) => Object.keys(value).length > 0, {
+      message: "Choose a level for each domain.",
+    }),
 });
 
 export const startAssessmentSchema = z.object({

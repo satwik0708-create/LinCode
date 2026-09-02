@@ -18,7 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       workspaceLabel={ROLE_WORKSPACE_LABEL.admin}
       user={{ name: user.name, email: user.email }}
       notifications={notifications}
-      settingsHref="/admin/settings"
+      settingsHref="/admin/dashboard"
     >
       {children}
     </AppShell>
