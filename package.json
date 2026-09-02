@@ -10,7 +10,7 @@
     "lint": "eslint src tests",
     "typecheck": "tsc --noEmit",
     "test": "tsx --conditions=react-server --test tests/*.test.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx --conditions=react-server scripts/seed.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",

@@ -33,7 +33,8 @@ The datastore seeds itself on first run, so the demo accounts work immediately.
 | --- | --- |
 | `npm run dev` | Development server |
 | `npm run build` / `npm start` | Production build and serve |
-| `npm test` | 53 unit and integration tests |
+| `npm test` | 56 unit and integration tests |
+| `npm run seed` | Reset the datastore to its seeded demo state |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
 
@@ -51,12 +52,33 @@ Password for all four: `Demo@Skill2025`
 Sign in as each in turn: **each account sees only its own application.** There is no screen
 anywhere that shows all four dashboards at once.
 
+### Signing up live in a demo
+
+Sign-up starts by asking *which role you are joining as* — Student, Faculty, Recruiter or
+Institution — and the answer decides both the account's role and the questions onboarding
+asks next. To demonstrate that on stage you need addresses that are not already taken, so
+these are reserved: nothing seeds them, and `npm run seed` frees them again afterwards.
+
+| Role | Address to sign up with | What onboarding then asks for |
+| --- | --- | --- |
+| Student | `demo.student@lincode.demo` | Institution, degree, branch, graduation year, CGPA → domains → level per domain → diagnostic |
+| Faculty | `demo.faculty@lincode.demo` | Institution, department, current role, date of birth, years in role, expertise |
+| Recruiter | `demo.recruiter@lincode.demo` | Company, sector, size, your designation, roles you hire for |
+| Institution | `demo.institution@lincode.demo` | The institution (name, type, website, official email, address, city/state, accreditation), then you as its representative |
+
+Any password meeting the strength rules works — `Demo@Skill2025` is convenient because it is
+the one already on the fixture accounts. Nothing sends mail, so the address only has to be
+unique; append `+2`, `+3` and so on (`demo.student+2@lincode.demo`) to run the same flow twice
+without reseeding.
+
+Run `npm run seed` between rehearsals to clear every account created this way.
+
 ---
 
 ## The student journey
 
 ```
-Landing → Sign up → Choose role → Student profile → Choose one or more domains
+Landing → Choose role → Sign up → Student profile → Choose one or more domains
        → Choose a level per domain → Diagnostic (intermediate/advanced only)
        → Placement → AI skill-gap analysis → Personalised path → Dashboard
        → Learn → Track progress → Maintain streak → Update skill profile
