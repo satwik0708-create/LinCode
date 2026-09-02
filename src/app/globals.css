@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Accessibility: every rem in the app is derived from this scale, so the
+       font-size control in Settings resizes the whole interface proportionally
+       (cards, gaps, controls) instead of only the text. */
+    --font-scale: 1;
+
+    --background: 210 40% 99%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 231 68% 52%;
+    --primary-foreground: 210 40% 99%;
+
+    --secondary: 214 32% 95%;
+    --secondary-foreground: 222 47% 20%;
+
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 18% 42%;
+
+    --accent: 231 84% 96%;
+    --accent-foreground: 231 68% 38%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 210 40% 99%;
+
+    --success: 152 62% 33%;
+    --success-foreground: 150 60% 97%;
+
+    --warning: 33 92% 42%;
+    --warning-foreground: 40 90% 97%;
+
+    --border: 214 25% 89%;
+    --input: 214 25% 87%;
+    --ring: 231 68% 52%;
+
+    --chart-1: 231 68% 56%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 265 66% 60%;
+    --chart-4: 33 92% 52%;
+    --chart-5: 340 70% 55%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 224 42% 7%;
+    --foreground: 213 31% 94%;
+
+    --card: 224 38% 10%;
+    --card-foreground: 213 31% 94%;
+
+    --popover: 224 38% 11%;
+    --popover-foreground: 213 31% 94%;
+
+    --primary: 226 80% 68%;
+    --primary-foreground: 224 45% 9%;
+
+    --secondary: 223 30% 17%;
+    --secondary-foreground: 213 31% 94%;
+
+    --muted: 223 30% 16%;
+    --muted-foreground: 216 18% 68%;
+
+    --accent: 226 40% 20%;
+    --accent-foreground: 226 85% 84%;
+
+    --destructive: 0 68% 58%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 152 52% 50%;
+    --success-foreground: 150 40% 8%;
+
+    --warning: 38 92% 60%;
+    --warning-foreground: 40 60% 10%;
+
+    --border: 223 26% 21%;
+    --input: 223 26% 24%;
+    --ring: 226 80% 68%;
+
+    --chart-1: 226 80% 70%;
+    --chart-2: 172 60% 52%;
+    --chart-3: 268 76% 74%;
+    --chart-4: 36 92% 62%;
+    --chart-5: 340 76% 68%;
+  }
+
+  html {
+    font-size: calc(1rem * var(--font-scale));
+    -webkit-text-size-adjust: 100%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Visible, consistent focus ring for keyboard users in both themes. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .grid-pattern {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.55) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.55) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+}
