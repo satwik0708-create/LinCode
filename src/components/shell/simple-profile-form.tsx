@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 export type FieldSpec =
   | { kind: "text"; name: string; label: string; placeholder?: string; required?: boolean; span?: boolean }
+  | { kind: "date"; name: string; label: string; required?: boolean; min?: string; max?: string }
   | { kind: "number"; name: string; label: string; placeholder?: string; min?: number; max?: number; required?: boolean }
   | { kind: "textarea"; name: string; label: string; placeholder?: string; required?: boolean }
   | { kind: "tags"; name: string; label: string; options: string[]; max?: number };
@@ -142,6 +143,8 @@ export function SimpleProfileForm({
                   );
                 }
 
+                const isNumber = field.kind === "number";
+                const isDate = field.kind === "date";
                 return (
                   <Field
                     key={field.name} id={field.name} label={field.label}
@@ -150,13 +153,13 @@ export function SimpleProfileForm({
                   >
                     <Input
                       id={field.name}
-                      type={field.kind === "number" ? "number" : "text"}
-                      min={field.kind === "number" ? field.min : undefined}
-                      max={field.kind === "number" ? field.max : undefined}
-                      placeholder={field.placeholder}
+                      type={isNumber ? "number" : isDate ? "date" : "text"}
+                      min={isNumber || isDate ? field.min : undefined}
+                      max={isNumber || isDate ? field.max : undefined}
+                      placeholder={field.kind === "text" || isNumber ? field.placeholder : undefined}
                       required={field.required}
                       value={(values[field.name] as string | number | undefined) ?? ""}
-                      onChange={(e) => set(field.name, field.kind === "number" ? Number(e.target.value) : e.target.value)}
+                      onChange={(e) => set(field.name, isNumber ? Number(e.target.value) : e.target.value)}
                     />
                   </Field>
                 );

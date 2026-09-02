@@ -18,6 +18,15 @@ export const ROLE_PREFIX: Record<Role, string> = {
   admin: "/admin",
 };
 
+/** Where each role begins its onboarding, straight after account creation. */
+export const ONBOARDING_ENTRY: Record<Role, string> = {
+  student: "/onboarding/student/profile",
+  faculty: "/onboarding/faculty/profile",
+  industry: "/onboarding/industry/profile",
+  institution: "/onboarding/institution/profile",
+  admin: "/admin/dashboard",
+};
+
 export const ROLE_LABEL: Record<Role, string> = {
   student: "Student",
   faculty: "Faculty / Academician",

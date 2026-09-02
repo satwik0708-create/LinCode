@@ -1,29 +1,33 @@
 import type { Metadata } from "next";
 import { requireRoleForOnboarding } from "@/lib/services/onboarding";
-import { SimpleProfileForm } from "@/components/shell/simple-profile-form";
+import { getInstitution } from "@/lib/data/users";
+import { InstitutionOnboarding } from "./institution-onboarding";
 
-export const metadata: Metadata = { title: "Institution profile" };
+export const metadata: Metadata = { title: "Register your institution" };
 
 export default async function InstitutionOnboardingPage() {
-  await requireRoleForOnboarding("institution");
+  const user = await requireRoleForOnboarding("institution");
+  // If the institution step is already done, resume at the representative step.
+  const institution = user.institutionId ? await getInstitution(user.institutionId) : undefined;
 
   return (
-    <SimpleProfileForm
-      title="Set up your institution workspace"
-      subtitle="Your analytics are scoped to this institution — you will only ever see your own students' data."
-      endpoint="/api/onboarding/institution/profile"
-      submitLabel="Enter my dashboard"
-      sections={[
-        {
-          heading: "Institution",
-          description: "The institution whose cohort you are responsible for.",
-          fields: [
-            { kind: "text", name: "institutionName", label: "Institution", placeholder: "Government College of Engineering, Pune", required: true, span: true },
-            { kind: "text", name: "designation", label: "Your designation", placeholder: "Head — Career Development Cell", required: true },
-            { kind: "text", name: "department", label: "Department / cell", placeholder: "Placement Office" },
-          ],
-        },
-      ]}
+    <InstitutionOnboarding
+      accountName={user.name}
+      accountEmail={user.email}
+      existing={
+        institution
+          ? {
+              institutionName: institution.name,
+              type: institution.type,
+              website: institution.website ?? "",
+              officialEmail: institution.officialEmail ?? "",
+              address: institution.address ?? "",
+              city: institution.city,
+              state: institution.state,
+              accreditation: institution.accreditation ?? "",
+            }
+          : null
+      }
     />
   );
 }

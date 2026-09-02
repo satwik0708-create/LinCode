@@ -2,9 +2,9 @@ import "server-only";
 import { z } from "zod";
 import {
   findOrCreateInstitutionByName, findOrCreateOrganizationByName, updateUser,
-  upsertFacultyProfile, upsertIndustryProfile, upsertInstitutionProfile,
+  upsertFacultyProfile, upsertIndustryProfile,
 } from "@/lib/data/users";
-import type { facultyProfileSchema, industryProfileSchema, institutionProfileSchema } from "@/lib/auth/validation";
+import type { facultyProfileSchema, industryProfileSchema } from "@/lib/auth/validation";
 
 /**
  * Non-student onboarding writes.
@@ -30,16 +30,5 @@ export const PROFILE_HANDLERS = {
     });
     await updateUser(userId, { organizationId, onboardingComplete: true });
     return "/industry/dashboard";
-  },
-
-  async institution(userId: string, data: z.infer<typeof institutionProfileSchema>): Promise<string> {
-    const institutionId = await findOrCreateInstitutionByName(data.institutionName);
-    await upsertInstitutionProfile(userId, {
-      institutionId,
-      designation: data.designation,
-      department: data.department,
-    });
-    await updateUser(userId, { institutionId, onboardingComplete: true });
-    return "/institution/dashboard";
   },
 } as const;

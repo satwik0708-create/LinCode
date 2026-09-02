@@ -3,14 +3,15 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Mail, Smartphone } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FormAlert, PasswordMeter } from "@/components/auth/form-field";
 import { postJson } from "@/lib/client";
+import type { RoleCard, SelectableRole } from "@/components/auth/role-cards";
 import { cn } from "@/lib/utils";
 
-export function SignupForm() {
+export function SignupForm({ role, card }: { role: SelectableRole; card: RoleCard }) {
   const router = useRouter();
   const [channel, setChannel] = React.useState<"email" | "mobile">("email");
   const [pending, setPending] = React.useState(false);
@@ -30,6 +31,7 @@ export function SignupForm() {
     setFields({});
 
     const result = await postJson<{ next?: string }>("/api/auth/signup", {
+      role,
       name,
       email: channel === "email" ? email : undefined,
       mobile: channel === "mobile" ? mobile : undefined,
@@ -44,18 +46,35 @@ export function SignupForm() {
       return;
     }
 
-    // Every new account goes to role selection — nothing is accessible before it.
+    // The account already holds its role, so it goes straight to that role's
+    // first onboarding step.
     router.replace(result.data.next ?? "/onboarding/role");
     router.refresh();
   }
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
-        <p className="text-sm text-muted-foreground">
-          One account, then choose whether you are joining as a student, faculty member, employer or institution.
-        </p>
+      <div className="space-y-3">
+        <Link
+          href="/signup"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" />
+          Choose a different role
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <span
+            className={cn("flex size-11 items-center justify-center rounded-xl bg-gradient-to-br text-xl", card.gradient)}
+            aria-hidden
+          >
+            {card.emoji}
+          </span>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Sign up as {card.title}</h1>
+            <p className="text-sm text-muted-foreground">Next we&rsquo;ll ask for {card.collects}.</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">

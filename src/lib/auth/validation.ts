@@ -42,6 +42,9 @@ export const domainIdSchema = z.enum(DOMAIN_IDS as [string, ...string[]]);
 
 export const signupSchema = z
   .object({
+    /** Chosen on the step before credentials, so the account is created with
+     *  its role already granted rather than picking one afterwards. */
+    role: roleSchema,
     name: nameSchema,
     email: emailSchema.optional(),
     mobile: mobileSchema.optional(),
@@ -98,6 +101,17 @@ export const studentProfileSchema = z.object({
 
 export const facultyProfileSchema = z.object({
   institutionName: z.string().trim().min(2).max(120),
+  dateOfBirth: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Use the date picker.")
+    .refine((v) => {
+      const d = Date.parse(v);
+      if (Number.isNaN(d)) return false;
+      const age = (Date.now() - d) / (365.25 * 24 * 3600 * 1000);
+      return age >= 18 && age <= 100;
+    }, "Enter a valid date of birth.")
+    .optional(),
   department: z.string().trim().min(2).max(80),
   designation: z.string().trim().min(2).max(80),
   yearsOfExperience: z.coerce.number().int().min(0).max(60),
@@ -114,10 +128,26 @@ export const industryProfileSchema = z.object({
   hiringFor: z.array(z.string().trim().max(60)).max(10).default([]),
 });
 
-export const institutionProfileSchema = z.object({
+/** Step one of institution registration: the institution itself. */
+export const institutionRegistrationSchema = z.object({
   institutionName: z.string().trim().min(2).max(120),
+  type: z.enum(["university", "college", "polytechnic", "iti", "autonomous", "deemed"]),
+  website: z.string().trim().url("Enter a full URL, including https://").max(200).optional().or(z.literal("")),
+  officialEmail: emailSchema,
+  address: z.string().trim().min(4).max(200),
+  city: z.string().trim().min(2).max(80),
+  state: z.string().trim().min(2).max(80),
+  accreditation: z.string().trim().max(120).optional(),
+});
+
+/** Step two: the person acting for it. */
+export const institutionRepresentativeSchema = z.object({
+  fullName: nameSchema,
+  officialEmail: emailSchema,
+  mobile: mobileSchema,
   designation: z.string().trim().min(2).max(80),
   department: z.string().trim().max(80).optional(),
+  purpose: z.string().trim().min(4).max(400),
 });
 
 export const selectDomainsSchema = z.object({

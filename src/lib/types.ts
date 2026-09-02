@@ -126,6 +126,8 @@ export interface FacultyProfile {
   userId: string;
   institutionId?: string;
   institutionName: string;
+  /** ISO date. Optional so profiles created before this field stay valid. */
+  dateOfBirth?: string;
   department: string;
   designation: string;
   yearsOfExperience: number;
@@ -147,22 +149,36 @@ export interface IndustryProfile {
   updatedAt: string;
 }
 
+/** The person acting for an institution, distinct from the institution itself. */
 export interface InstitutionProfile {
   userId: string;
   institutionId: string;
   designation: string;
   department?: string;
+  officialEmail?: string;
+  mobile?: string;
+  /** Why they are here — placement drives, analytics, industry outreach. */
+  purpose?: string;
   updatedAt: string;
 }
+
+export type InstitutionType = "university" | "college" | "polytechnic" | "iti" | "autonomous" | "deemed";
 
 export interface Institution {
   id: string;
   name: string;
-  type: "university" | "college" | "polytechnic" | "iti";
+  type: InstitutionType;
   city: string;
   state: string;
   departments: string[];
   studentCount: number;
+  /** Captured when an institution registers itself, blank for ones inferred
+   *  from a student or faculty profile. */
+  website?: string;
+  officialEmail?: string;
+  address?: string;
+  /** e.g. "NAAC A++", "NBA accredited", "Affiliated to SPPU". */
+  accreditation?: string;
   createdAt: string;
 }
 
