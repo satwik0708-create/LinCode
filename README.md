@@ -27,13 +27,19 @@ Generate a signing key:
 node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
+`npm run dev` runs without `.env.local` — it falls back to a built-in development
+key and says so. A production build does not: `npm start` refuses to boot without a
+real `SESSION_SECRET` of at least 32 characters, because sessions are signed with it.
+
+Node 20.9 or newer is required.
+
 The datastore seeds itself on first run, so the demo accounts work immediately.
 
 | Script | What it does |
 | --- | --- |
 | `npm run dev` | Development server |
 | `npm run build` / `npm start` | Production build and serve |
-| `npm test` | 63 unit and integration tests |
+| `npm test` | 67 unit and integration tests |
 | `npm run seed` | Reset the datastore to its seeded demo state |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
@@ -72,6 +78,9 @@ unique; append `+2`, `+3` and so on (`demo.student+2@lincode.demo`) to run the s
 without reseeding.
 
 Run `npm run seed` between rehearsals to clear every account created this way.
+
+Reseeding deletes the accounts you created, so a browser still holding one of their
+sessions is signed out on its next request and told why — it does not get stuck.
 
 ---
 

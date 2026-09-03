@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { checkPasswordStrength, hashPassword, verifyPassword } from "../src/lib/auth/password";
 import { createSessionToken, verifySessionToken } from "../src/lib/auth/session";
-import { canAccess, homeFor, roleForPath } from "../src/lib/auth/roles";
+import { canAccess, homeFor, roleForPath, STALE_SESSION_PATH } from "../src/lib/auth/roles";
 import { consume } from "../src/lib/auth/rate-limit";
 
 test("passwords are salted, so identical inputs hash differently", async () => {
@@ -97,4 +97,43 @@ test("rate limiting blocks a burst and reports a retry window", () => {
   const blocked = consume(key, rule);
   assert.equal(blocked.allowed, false);
   assert.ok(blocked.retryAfterSeconds > 0);
+});
+
+
+/**
+ * Regression: a cookie that verifies but no longer names a usable account used
+ * to bounce forever. Middleware trusts the signed cookie and redirects such a
+ * visitor off /login to their dashboard; the server guard re-read the record,
+ * found nothing, and redirected back to /login. Neither cleared the cookie, so
+ * the two chased each other until the browser gave up — which is what
+ * "the page opens and then never loads" looks like.
+ *
+ * The cycle is broken by sending them somewhere that can actually delete the
+ * cookie. These assertions pin the two properties that make that work.
+ */
+test("the stale-session exit is not a page middleware will redirect away from", () => {
+  // Middleware bounces cookie-bearing visitors off these. If the stale-session
+  // path were one of them, the loop would simply re-form at a new address.
+  const bounced = ["/login", "/signup"];
+  assert.ok(!bounced.includes(STALE_SESSION_PATH));
+  assert.ok(!STALE_SESSION_PATH.startsWith("/signup/"));
+
+  // It must also sit outside every role area, or the role check would redirect
+  // it before the cookie could be cleared.
+  assert.equal(roleForPath(STALE_SESSION_PATH), null);
+});
+
+test("no role's home is an auth screen, so a signed-in bounce cannot cycle", () => {
+  // homeFor is what middleware sends a cookie-bearing visitor to. If it could
+  // ever answer /login or /signup, that redirect would loop on its own.
+  const roleSets = [
+    ["student"], ["faculty"], ["industry"], ["institution"], ["admin"],
+    ["student", "faculty"], [],
+  ] as const;
+
+  for (const roles of roleSets) {
+    const home = homeFor([...roles], null);
+    assert.ok(!home.startsWith("/login"), `homeFor(${roles}) must not be /login`);
+    assert.ok(!home.startsWith("/signup"), `homeFor(${roles}) must not be /signup`);
+  }
 });

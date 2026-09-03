@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "LinCode \u2014 skill assessment, personalized learning, internships and placements platform",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -27,6 +27,16 @@ export const ONBOARDING_ENTRY: Record<Role, string> = {
   admin: "/admin/dashboard",
 };
 
+/**
+ * Where a visitor goes when their cookie verifies but names no usable account.
+ *
+ * It lives here, beside the other route constants, because both middleware and
+ * the server guard reason about it and neither may import the other's runtime.
+ * The route it names clears the cookie — which is the only thing that stops
+ * middleware and the guard redirecting at each other forever.
+ */
+export const STALE_SESSION_PATH = "/api/auth/stale-session";
+
 export const ROLE_LABEL: Record<Role, string> = {
   student: "Student",
   faculty: "Faculty / Academician",

@@ -17,6 +17,7 @@ export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const nextParam = params.get("next");
+  const reasonParam = params.get("reason");
 
   const [method, setMethod] = React.useState<Method>("email");
   const [mobileMode, setMobileMode] = React.useState<MobileMode>("password");
@@ -24,6 +25,15 @@ export function LoginForm() {
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string>();
   const [notice, setNotice] = React.useState<string>();
+
+  // Set when a stale session was cleared on the way here, so the visitor is
+  // told why they were signed out instead of silently landing on a login form.
+  const staleNotice =
+    reasonParam === "locked"
+      ? "That account is temporarily locked after too many failed sign-in attempts. Try again shortly."
+      : reasonParam === "missing_user"
+        ? "Your session referred to an account that no longer exists, so we signed you out. Please sign in again."
+        : undefined;
   const [fields, setFields] = React.useState<Record<string, string>>({});
 
   const [email, setEmail] = React.useState("");
@@ -130,6 +140,7 @@ export function LoginForm() {
 
       {error && <FormAlert tone="error">{error}</FormAlert>}
       {notice && !error && <FormAlert tone="info">{notice}</FormAlert>}
+      {staleNotice && !error && !notice && <FormAlert tone="info">{staleNotice}</FormAlert>}
 
       {method === "email" && (
         <form onSubmit={submitPassword} className="space-y-4" noValidate>
