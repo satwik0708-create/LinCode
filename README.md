@@ -33,6 +33,12 @@ real `SESSION_SECRET` of at least 32 characters, because sessions are signed wit
 
 Node 20.9 or newer is required.
 
+**On Windows**, start the server from the folder's exact capitalisation. `cd lincode`
+into a folder named `LinCode` succeeds — Windows is case-insensitive — but webpack is
+not, and it will then compile every dependency twice, once per spelling. Two copies of
+Next's router context makes every page throw *"expected layout router to be mounted"*.
+`next.config.ts` checks for this at startup and prints the exact fix.
+
 The datastore seeds itself on first run, so the demo accounts work immediately.
 
 | Script | What it does |
