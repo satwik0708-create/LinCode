@@ -40,7 +40,7 @@ The datastore seeds itself on first run, so the demo accounts work immediately.
 
 ### Demo accounts
 
-Password for all four: `Demo@Skill2025`
+Password for all four: `Demo@Skill2026`
 
 | Role | Email | What it shows |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ these are reserved: nothing seeds them, and `npm run seed` frees them again afte
 | Recruiter | `demo.recruiter@lincode.demo` | Company, sector, size, your designation, roles you hire for |
 | Institution | `demo.institution@lincode.demo` | The institution (name, type, website, official email, address, city/state, accreditation), then you as its representative |
 
-Any password meeting the strength rules works — `Demo@Skill2025` is convenient because it is
+Any password meeting the strength rules works — `Demo@Skill2026` is convenient because it is
 the one already on the fixture accounts. Nothing sends mail, so the address only has to be
 unique; append `+2`, `+3` and so on (`demo.student+2@lincode.demo`) to run the same flow twice
 without reseeding.

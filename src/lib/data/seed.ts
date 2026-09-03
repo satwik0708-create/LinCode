@@ -17,7 +17,7 @@ import type {
  * render institutional data instead.
  */
 
-const DEMO_PASSWORD = "Demo@Skill2025";
+const DEMO_PASSWORD = "Demo@Skill2026";
 
 /**
  * A minimal one-page PDF, written to the upload store so the seeded review

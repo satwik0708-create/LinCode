@@ -121,10 +121,21 @@ export function AssessmentCentre({ domains, initialDomain }: { domains: DomainRo
               </div>
             </div>
 
-            <Button size="sm" className="w-full" onClick={() => setRunning(domain)} disabled={levelFor(domain.id) === "beginner"}>
+            {/*
+              Every level is takeable here, beginner included. Enrolling as a
+              beginner still skips the test — but a beginner who wants to prove
+              what they already know should not be told no, and the per-skill
+              result is what lets their path skip modules they have covered.
+            */}
+            <Button size="sm" className="w-full" onClick={() => setRunning(domain)}>
               <Play className="size-3.5" />
-              {levelFor(domain.id) === "beginner" ? "Beginner needs no test" : "Start diagnostic"}
+              {levelFor(domain.id) === "beginner" ? "Take the beginner test" : "Start diagnostic"}
             </Button>
+            {levelFor(domain.id) === "beginner" && (
+              <p className="text-[11px] text-muted-foreground">
+                Optional — it cannot move you up a track, but anything you prove is marked skippable on your path.
+              </p>
+            )}
           </CardContent>
         </Card>
       ))}
