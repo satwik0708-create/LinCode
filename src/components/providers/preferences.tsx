@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { readStored, writeStored } from "@/lib/storage";
 
 /**
  * Appearance preferences (theme + interface scale).
@@ -57,8 +58,8 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
 
   // Hydrate from what the pre-paint script already applied.
   React.useEffect(() => {
-    const storedTheme = (localStorage.getItem(THEME_KEY) as Theme | null) ?? "system";
-    const storedScale = (localStorage.getItem(SCALE_KEY) as FontScale | null) ?? "base";
+    const storedTheme = (readStored(THEME_KEY) as Theme | null) ?? "system";
+    const storedScale = (readStored(SCALE_KEY) as FontScale | null) ?? "base";
     setThemeState(storedTheme);
     setScaleState(SCALE_ORDER.includes(storedScale) ? storedScale : "base");
     setResolvedTheme(applyTheme(storedTheme));
@@ -76,13 +77,13 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
 
   const setTheme = React.useCallback((next: Theme) => {
     setThemeState(next);
-    localStorage.setItem(THEME_KEY, next);
+    writeStored(THEME_KEY, next);
     setResolvedTheme(applyTheme(next));
   }, []);
 
   const setFontScale = React.useCallback((next: FontScale) => {
     setScaleState(next);
-    localStorage.setItem(SCALE_KEY, next);
+    writeStored(SCALE_KEY, next);
     applyScale(next);
   }, []);
 
@@ -91,7 +92,7 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
       setScaleState((current) => {
         const index = SCALE_ORDER.indexOf(current);
         const next = SCALE_ORDER[Math.min(SCALE_ORDER.length - 1, Math.max(0, index + direction))];
-        localStorage.setItem(SCALE_KEY, next);
+        writeStored(SCALE_KEY, next);
         applyScale(next);
         return next;
       });

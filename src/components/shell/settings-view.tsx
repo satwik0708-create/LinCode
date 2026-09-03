@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { readStored, writeStored } from "@/lib/storage";
 import Link from "next/link";
 import { Check, Loader2, Monitor, Moon, Save, Sun } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -224,7 +225,7 @@ function NotificationPreferences() {
 
   React.useEffect(() => {
     try {
-      const stored = localStorage.getItem("lincode.notifications");
+      const stored = readStored("lincode.notifications");
       if (stored) setPrefs((prev) => ({ ...prev, ...JSON.parse(stored) }));
     } catch {
       // Storage can be unavailable (private mode); defaults are fine.
@@ -235,7 +236,7 @@ function NotificationPreferences() {
     setPrefs((prev) => {
       const next = { ...prev, [key]: !prev[key] };
       try {
-        localStorage.setItem("lincode.notifications", JSON.stringify(next));
+        writeStored("lincode.notifications", JSON.stringify(next));
       } catch {
         // Ignore: the toggle still applies for this session.
       }

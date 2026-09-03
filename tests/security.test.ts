@@ -137,3 +137,33 @@ test("no role's home is an auth screen, so a signed-in bounce cannot cycle", () 
     assert.ok(!home.startsWith("/signup"), `homeFor(${roles}) must not be /signup`);
   }
 });
+
+
+/**
+ * Regression: storage access must never be able to take the app down.
+ *
+ * Safari throws a SecurityError on localStorage when site data is blocked, and
+ * any browser throws on setItem once the quota is full. PreferencesProvider
+ * wraps the whole tree, so an unguarded read there crashed every page —
+ * including the landing page, before anything else had a chance to run.
+ */
+test("storage helpers swallow a throwing localStorage instead of propagating", async () => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "window");
+  const boom = () => {
+    throw new Error("SecurityError: The operation is insecure.");
+  };
+
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: { localStorage: { getItem: boom, setItem: boom } },
+  });
+
+  try {
+    const { readStored, writeStored } = await import("../src/lib/storage");
+    assert.equal(readStored("lincode.theme"), null, "a failed read must read as 'nothing stored'");
+    assert.doesNotThrow(() => writeStored("lincode.theme", "dark"), "a failed write must not propagate");
+  } finally {
+    if (original) Object.defineProperty(globalThis, "window", original);
+    else Reflect.deleteProperty(globalThis, "window");
+  }
+});

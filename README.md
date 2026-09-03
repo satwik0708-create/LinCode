@@ -39,7 +39,7 @@ The datastore seeds itself on first run, so the demo accounts work immediately.
 | --- | --- |
 | `npm run dev` | Development server |
 | `npm run build` / `npm start` | Production build and serve |
-| `npm test` | 67 unit and integration tests |
+| `npm test` | 68 unit and integration tests |
 | `npm run seed` | Reset the datastore to its seeded demo state |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
