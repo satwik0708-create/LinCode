@@ -58,6 +58,12 @@ Password for all four: `Demo@Skill2026`
 Sign in as each in turn: **each account sees only its own application.** There is no screen
 anywhere that shows all four dashboards at once.
 
+A runtime error no longer takes the page with it: each workspace has its own error
+boundary, so a failure in one screen leaves the navigation, theme and sign-out working
+and offers a retry. `app/global-error.tsx` catches a failure in the root layout itself
+and is deliberately self-contained — no providers, no design system, its own styles —
+because that is the one case where none of those can be relied on.
+
 ### Signing up live in a demo
 
 Sign-up starts by asking *which role you are joining as* — Student, Faculty, Recruiter or
