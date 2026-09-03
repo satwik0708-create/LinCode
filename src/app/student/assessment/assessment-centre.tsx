@@ -13,6 +13,17 @@ import { cn, formatDate } from "@/lib/utils";
 
 type Level = "beginner" | "intermediate" | "advanced";
 
+/**
+ * What each paper asks and what it can place you at. A paper never asks above
+ * the level claimed, so its ceiling is that level — said plainly here rather
+ * than left for the student to discover from their result.
+ */
+const TEST_BLURB: Record<Level, string> = {
+  beginner: "Beginner questions only. Records what you already know; it cannot move you up a track.",
+  intermediate: "Beginner and intermediate questions. Places you at intermediate or, on a low score, beginner.",
+  advanced: "The full range, weighted to the harder end. Places you at advanced, intermediate or beginner.",
+};
+
 interface DomainRow {
   id: string;
   name: string;
@@ -100,7 +111,7 @@ export function AssessmentCentre({ domains, initialDomain }: { domains: DomainRo
             </div>
 
             <div>
-              <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Assess me as</p>
+              <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">Choose a test level</p>
               <div className="grid grid-cols-3 gap-1.5">
                 {(["beginner", "intermediate", "advanced"] as const).map((option) => (
                   <button
@@ -121,10 +132,17 @@ export function AssessmentCentre({ domains, initialDomain }: { domains: DomainRo
               </div>
             </div>
 
-            <Button size="sm" className="w-full" onClick={() => setRunning(domain)} disabled={levelFor(domain.id) === "beginner"}>
+            {/*
+              All three papers are takeable, and the button names the one you
+              are about to sit. Enrolling as a beginner still skips the test —
+              but this page is where somebody comes to prove what they know,
+              and being told no here would be the wrong answer.
+            */}
+            <Button size="sm" className="w-full" onClick={() => setRunning(domain)}>
               <Play className="size-3.5" />
-              {levelFor(domain.id) === "beginner" ? "Beginner needs no test" : "Start diagnostic"}
+              Take the {levelFor(domain.id)} test
             </Button>
+            <p className="text-[11px] text-muted-foreground">{TEST_BLURB[levelFor(domain.id)]}</p>
           </CardContent>
         </Card>
       ))}

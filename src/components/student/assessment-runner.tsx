@@ -56,6 +56,10 @@ export function AssessmentRunner({
   const [pending, setPending] = React.useState(false);
   const [result, setResult] = React.useState<{ result: AssessmentResultView; explanation: string }>();
 
+  // A beginner paper is optional and cannot re-place anyone, so it is described
+  // as what it is rather than as a diagnostic that decides where they start.
+  const isBeginnerPaper = declaredLevel === "beginner";
+
   async function start() {
     setPending(true);
     setError(undefined);
@@ -101,19 +105,39 @@ export function AssessmentRunner({
       <Card>
         <CardHeader>
           <Badge variant="secondary" className="w-fit">{domainName}</Badge>
-          <CardTitle className="mt-2">Diagnostic assessment</CardTitle>
+          <CardTitle className="mt-2">{isBeginnerPaper ? "Beginner check" : "Diagnostic assessment"}</CardTitle>
           <CardDescription>
-            You said you are <strong className="text-foreground">{declaredLevel}</strong> in {domainName}. This short
-            test checks that against the domain&rsquo;s competency map so your learning path starts in the right place —
-            not too far back, not past a gap.
+            {isBeginnerPaper ? (
+              <>
+                You said you are <strong className="text-foreground">beginner</strong> in {domainName}, and we take you
+                at your word — this paper cannot move you up a track. What it does is record what you already know, so
+                your path can skip the modules you have covered instead of walking you through them again.
+              </>
+            ) : (
+              <>
+                You said you are <strong className="text-foreground">{declaredLevel}</strong> in {domainName}. This short
+                test checks that against the domain&rsquo;s competency map so your learning path starts in the right place —
+                not too far back, not past a gap.
+              </>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && <FormAlert tone="error">{error}</FormAlert>}
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex gap-2.5"><span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />About 10 questions, roughly 10 minutes.</li>
+            <li className="flex gap-2.5">
+              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
+              {isBeginnerPaper
+                ? "Around half a dozen questions, all at beginner level."
+                : "About 10 questions, roughly 10 minutes."}
+            </li>
             <li className="flex gap-2.5"><span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />Questions spread across the skills this domain requires.</li>
-            <li className="flex gap-2.5"><span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />A low score is not a failure — it just means we start earlier.</li>
+            <li className="flex gap-2.5">
+              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
+              {isBeginnerPaper
+                ? "Entirely optional — skipping it just means starting from the top."
+                : "A low score is not a failure — it just means we start earlier."}
+            </li>
           </ul>
           <p className="flex items-start gap-2 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
             <ShieldCheck className="mt-0.5 size-3.5 shrink-0" />

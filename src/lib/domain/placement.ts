@@ -27,7 +27,9 @@ export const DEFAULT_PLACEMENT_POLICY: PlacementPolicy = {
   skipDiagnostic: ["beginner"],
   questionCount: 10,
   bands: {
-    // Beginners are taken at their word and start at the beginning.
+    // Beginners are taken at their word and start at the beginning. A beginner
+    // paper only covers beginner material, so no score on it can evidence a
+    // higher track — its value is the per-skill evidence, not the placement.
     beginner: [{ minScore: 0, level: "beginner", label: "Beginner track" }],
 
     // "I've learned some of this" — prove it, or start over. An intermediate
@@ -71,6 +73,11 @@ export function placementExplanation(
   placedLevel: LearningLevel,
   score: number,
 ): string {
+  // A beginner paper is optional and cannot move anybody up — it exists to
+  // record what they already know, so say what it actually bought them.
+  if (declaredLevel === "beginner") {
+    return `You scored ${score}% on the beginner paper. You stay on the beginner track, but the per-skill results are now on your profile — anything you have already proven is marked skippable on your learning path.`;
+  }
   if (declaredLevel === placedLevel) {
     return `You scored ${score}%, which confirms the ${placedLevel} level you selected. Your path starts there.`;
   }

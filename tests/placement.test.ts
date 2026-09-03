@@ -4,10 +4,28 @@ import { DEFAULT_PLACEMENT_POLICY, placeLearner, requiresDiagnostic } from "../s
 import { buildDiagnostic, questionsForDomain, toClientQuestion } from "../src/lib/domain/questions";
 import { DOMAIN_IDS } from "../src/lib/domain/domains";
 
-test("beginners skip the diagnostic, everyone else takes one", () => {
+test("enrolling as a beginner never demands a diagnostic", () => {
+  // This drives enrolment only. The Skill Assessment page lets a beginner take
+  // the paper on purpose; it is enrolment that must not block on one.
   assert.equal(requiresDiagnostic("beginner"), false);
   assert.equal(requiresDiagnostic("intermediate"), true);
   assert.equal(requiresDiagnostic("advanced"), true);
+});
+
+test("a beginner paper is takeable, real, and cannot move anyone up", () => {
+  for (const domainId of DOMAIN_IDS) {
+    const paper = buildDiagnostic(domainId, "beginner", 10);
+    assert.ok(paper.length >= 5, `${domainId} must have a beginner paper worth sitting, got ${paper.length}`);
+    assert.ok(
+      paper.every((q) => q.level === "beginner"),
+      `${domainId} must not ask a beginner anything above beginner level`,
+    );
+    assert.ok(new Set(paper.map((q) => q.skillId)).size >= 3, `${domainId} must spread across skills`);
+  }
+
+  // However well it goes, a beginner paper only covers beginner material.
+  assert.equal(placeLearner("beginner", 0).level, "beginner");
+  assert.equal(placeLearner("beginner", 100).level, "beginner");
 });
 
 test("a declared level is a hypothesis, not a verdict", () => {

@@ -308,7 +308,7 @@ function DemoCredentials() {
             </div>
           ))}
           <p className="pt-1.5">
-            Password for all four: <code className="rounded bg-background px-1.5 py-0.5">Demo@Skill2025</code>
+            Password for all four: <code className="rounded bg-background px-1.5 py-0.5">Demo@Skill2026</code>
           </p>
         </div>
       )}

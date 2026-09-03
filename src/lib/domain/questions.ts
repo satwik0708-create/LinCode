@@ -13,6 +13,21 @@ type Q = [skillId: string, level: LearningLevel, prompt: string, options: string
 
 const BANKS: Record<string, Q[]> = {
   fullstack: [
+    ["html", "beginner", "Which tag marks the main, non-repeated content of a page?",
+      ["<div id=\"main\">", "<main>", "<section>", "<article>"], 1,
+      "<main> names the page's primary content for assistive technology; a div with an id means nothing to it."],
+    ["css", "beginner", "What does `box-sizing: border-box` change?",
+      ["Padding and border are included in the declared width", "Margins collapse between siblings", "The element becomes a flex container", "Overflow is clipped"], 0,
+      "With border-box, a declared width already includes padding and border, so a box does not grow when you pad it."],
+    ["javascript", "beginner", "Which comparison is true in JavaScript?",
+      ["0 === \"0\"", "0 == \"0\"", "null === undefined", "NaN === NaN"], 1,
+      "`==` coerces the string to a number, so 0 == \"0\"; `===` does not coerce, and NaN is never equal to itself."],
+    ["dom", "beginner", "Which returns the first element matching a CSS selector?",
+      ["document.getElementsByClassName", "document.querySelector", "document.querySelectorAll", "document.getElementById"], 1,
+      "querySelector takes any CSS selector and returns the first match, or null."],
+    ["git", "beginner", "You committed to main but meant to work on a branch, and have not pushed. The cleanest fix is:",
+      ["Delete the repository and re-clone", "Create a branch at the current commit, then reset main back", "Edit the commit message", "Push anyway and revert later"], 1,
+      "Branching at the current commit keeps the work, and resetting main puts the shared branch back where it was."],
     ["html", "beginner", "Which element correctly associates a caption with a form control for screen readers?",
       ["<span> next to the input", "<label for=\"id\">", "<div class=\"label\">", "The placeholder attribute"], 1,
       "A <label> with a matching `for` attribute is what assistive technology uses to announce the control."],
@@ -61,6 +76,18 @@ const BANKS: Record<string, Q[]> = {
   ],
 
   ml: [
+    ["python", "beginner", "What does a list comprehension `[f(x) for x in xs if p(x)]` produce?",
+      ["A generator that is consumed once", "A new list of f(x) for the items passing p", "The original list, filtered in place", "A dictionary keyed by x"], 1,
+      "A comprehension in square brackets builds a new list eagerly; the parenthesised form is the lazy generator."],
+    ["ml-supervised", "beginner", "A model scores 99% on training data and 62% on held-out data. This is:",
+      ["Underfitting", "Overfitting", "Data leakage into the test set", "A labelling error"], 1,
+      "Memorising the training set while failing to generalise is the definition of overfitting."],
+    ["model-eval", "beginner", "Why split data into train and test sets at all?",
+      ["To halve the training time", "To estimate performance on data the model has not seen", "To balance the classes", "To remove outliers"], 1,
+      "A score on data the model trained on tells you nothing about how it will behave on new data."],
+    ["numpy-pandas", "beginner", "What does `df.shape` return for a DataFrame?",
+      ["The column data types", "A (rows, columns) tuple", "The memory footprint", "The index labels"], 1,
+      "`shape` is a tuple of row and column counts — the first thing to check after loading data."],
     ["python", "beginner", "Which structure gives average O(1) membership checks for a large collection of ids?",
       ["list", "set", "tuple", "generator"], 1,
       "Sets are hash-based, so `in` is roughly constant time."],
@@ -100,6 +127,18 @@ const BANKS: Record<string, Q[]> = {
   ],
 
   cloud: [
+    ["linux", "beginner", "What do the permissions `rw-r--r--` grant?",
+      ["Everyone can read and write", "Owner reads and writes; everyone else only reads", "Only the owner can read", "The file is executable by the group"], 1,
+      "The three triplets are owner, group and others: rw- for the owner, r-- for the other two."],
+    ["containers", "beginner", "What is the difference between a container image and a running container?",
+      ["None — the words are interchangeable", "The image is the immutable filesystem; the container is a running instance of it", "The image runs, the container stores logs", "The container is the image after compression"], 1,
+      "One image starts many containers, the way one class instantiates many objects."],
+    ["cloud-core", "beginner", "What does a region's availability zones give you?",
+      ["Lower storage cost", "Failure isolation within a region", "Automatic global replication", "A private network per customer"], 1,
+      "Zones are isolated failure domains, so a workload spread across them survives losing one."],
+    ["cicd", "beginner", "What is the point of running the test suite in CI rather than only locally?",
+      ["It runs faster on a build server", "Every change is checked in a clean, identical environment before merge", "It removes the need for code review", "It reduces the repository size"], 1,
+      "CI catches what \"works on my machine\" hides, on every change, before it reaches the shared branch."],
     ["linux", "beginner", "Which command shows which process is listening on port 8080?",
       ["ls -l /proc", "ss -ltnp", "chmod 8080", "df -h"], 1,
       "`ss -ltnp` lists listening TCP sockets with the owning process."],
@@ -136,6 +175,18 @@ const BANKS: Record<string, Q[]> = {
   ],
 
   "data-science": [
+    ["stats", "beginner", "When is the median a better summary than the mean?",
+      ["Never — the mean is always preferred", "When the distribution is skewed or has outliers", "Only for categorical data", "When the sample is large"], 1,
+      "One extreme value drags the mean; the median barely moves, which is why incomes are reported as medians."],
+    ["data-viz", "beginner", "Why is a bar chart usually clearer than a pie chart for comparing categories?",
+      ["It uses fewer colours", "Length is easier to compare accurately than angle or area", "It fits more categories on screen", "Pie charts cannot show percentages"], 1,
+      "People judge length well and angle badly, which is why bars beat pies for comparison."],
+    ["sql-analytics", "beginner", "What does GROUP BY do?",
+      ["Sorts the result rows", "Collapses rows sharing a value into one row per group for aggregation", "Removes duplicate rows", "Joins two tables"], 1,
+      "GROUP BY forms the groups that aggregates like COUNT and SUM are computed over; ORDER BY is what sorts."],
+    ["python", "beginner", "Reading a CSV whose numeric column arrives as text usually means:",
+      ["The file is corrupt", "Some rows contain a non-numeric value, so the whole column was typed as object", "pandas does not infer numeric types", "The column has too many rows"], 1,
+      "One stray \"N/A\" or thousands separator is enough to make pandas keep the entire column as text."],
     ["stats", "beginner", "A 95% confidence interval means:",
       ["95% of the data lies inside it", "The procedure captures the true parameter in 95% of repeated samples", "There is a 95% chance the sample is correct", "The p-value is 0.95"], 1,
       "Confidence is a property of the long-run procedure, not of a single interval."],
@@ -169,6 +220,18 @@ const BANKS: Record<string, Q[]> = {
   ],
 
   cybersecurity: [
+    ["sec-fundamentals", "beginner", "What does the CIA triad stand for in security?",
+      ["Control, Isolation, Auditing", "Confidentiality, Integrity, Availability", "Cryptography, Identity, Access", "Compliance, Incident response, Assurance"], 1,
+      "Confidentiality, integrity and availability are the three properties nearly every control exists to protect."],
+    ["sec-fundamentals", "beginner", "Why is least privilege a security control rather than an inconvenience?",
+      ["It makes systems faster", "It limits what a compromised account or process can reach", "It removes the need for passwords", "It encrypts data at rest"], 1,
+      "Breaches are contained by what the compromised identity could not do."],
+    ["cryptography", "beginner", "What does hashing a password with a salt prevent?",
+      ["Brute-force guessing of a single password", "One precomputed table cracking every reused password at once", "Network interception of the password", "Users choosing weak passwords"], 1,
+      "A per-user salt makes rainbow tables useless; it does not stop an attacker brute-forcing one hash."],
+    ["networking", "beginner", "What does HTTPS give you that HTTP does not?",
+      ["Faster page loads", "Encryption in transit plus server identity verification", "Protection against SQL injection", "Guaranteed uptime"], 1,
+      "TLS encrypts the connection and proves the server is who the certificate says — it says nothing about the app's own bugs."],
     ["sec-fundamentals", "beginner", "Defence in depth means:",
       ["One very strong control", "Multiple independent controls so a single failure is not fatal", "Encrypting everything twice", "Only using a firewall"], 1,
       "Layered controls ensure one bypass does not equal full compromise."],
@@ -244,14 +307,22 @@ export function toClientQuestion(q: AssessmentQuestion): ClientQuestion {
 /**
  * Build a diagnostic for a domain at a declared level.
  *
- * Beginners never reach here (they skip the test). Intermediate learners are
- * probed on beginner+intermediate items; advanced learners get the full range,
- * weighted toward the harder end.
+ * A paper never asks above the level claimed. Beginners get beginner items
+ * only, intermediate learners are probed on beginner+intermediate, and advanced
+ * learners get the full range. Enrolling as a beginner still skips the test —
+ * this exists for the beginner who asks for it from the Skill Assessment page,
+ * where the per-skill scores it produces are what let their path skip modules
+ * they already know.
  */
+const LEVELS_UP_TO: Record<LearningLevel, LearningLevel[]> = {
+  beginner: ["beginner"],
+  intermediate: ["beginner", "intermediate"],
+  advanced: ["beginner", "intermediate", "advanced"],
+};
+
 export function buildDiagnostic(domainId: string, declaredLevel: LearningLevel, size = 10): AssessmentQuestion[] {
   const pool = questionsForDomain(domainId);
-  const wanted: LearningLevel[] =
-    declaredLevel === "advanced" ? ["beginner", "intermediate", "advanced"] : ["beginner", "intermediate"];
+  const wanted = LEVELS_UP_TO[declaredLevel] ?? LEVELS_UP_TO.intermediate;
 
   const eligible = pool.filter((q) => wanted.includes(q.level));
 

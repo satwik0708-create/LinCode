@@ -8,6 +8,7 @@ import { ArrowRight, ChevronRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TextEffect } from "@/components/ui/text-effect";
 import { AnimatedGroup } from "@/components/ui/animated-group";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 /**
@@ -53,7 +54,7 @@ export function HeroSection() {
                     href="/signup"
                     className="group mx-auto flex w-fit items-center gap-3 rounded-full border bg-card p-1 pl-4 text-sm shadow-sm transition-colors hover:bg-accent"
                   >
-                    <span className="text-foreground">Built for Smart India Hackathon 2025</span>
+                    <span className="text-foreground">Built for Smart India Hackathon 2026</span>
                     <span className="block h-4 w-px bg-border" />
                     <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-300 group-hover:translate-x-0.5">
                       <ArrowRight className="size-3.5" />
@@ -209,15 +210,20 @@ export function HeroHeader() {
                 <span className="text-base font-semibold tracking-tight">LinCode</span>
               </Link>
 
-              <button
-                type="button"
-                onClick={() => setMenuOpen((open) => !open)}
-                aria-label={menuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={menuOpen}
-                className="relative z-20 -m-2.5 block cursor-pointer p-2.5 lg:hidden"
-              >
-                {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-              </button>
+              <div className="flex items-center gap-1 lg:hidden">
+                {/* Reachable without opening the menu — someone who needs dark
+                    mode needs it on the first screen, not two taps in. */}
+                <ThemeToggle />
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((open) => !open)}
+                  aria-label={menuOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={menuOpen}
+                  className="relative z-20 -m-2.5 block cursor-pointer p-2.5"
+                >
+                  {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+                </button>
+              </div>
             </div>
 
             <div className="hidden lg:block">
@@ -233,6 +239,7 @@ export function HeroHeader() {
             </div>
 
             <div className="hidden items-center gap-2 lg:flex">
+              <ThemeToggle />
               <Button asChild variant="ghost" size="sm">
                 <Link href="/login">Sign in</Link>
               </Button>
