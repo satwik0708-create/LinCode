@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { DATA_DIR } from "@/lib/data/store";
 
 /**
  * Deployment self-check.
@@ -21,7 +22,9 @@ export async function GET() {
   const secret = process.env.SESSION_SECRET;
   const secretOk = Boolean(secret) && secret!.length >= MIN_SECRET_LENGTH;
 
-  const dataDir = path.resolve(process.cwd(), process.env.DATA_DIR || ".data");
+  // The store's own resolved directory, so this reports what the app actually
+  // uses rather than a second guess at the same rule.
+  const dataDir = DATA_DIR;
   let writable = false;
   let writeError: string | undefined;
   try {
@@ -58,7 +61,14 @@ export async function GET() {
       checks: {
         sessionSecret: secret ? (secretOk ? "ok" : `too short (${secret.length})`) : "missing",
         dataDir,
-        dataDirEnv: process.env.DATA_DIR ?? "(not set)",
+        // Distinguishes "not set" from "set to an empty value", which look the
+        // same from a dashboard and behave the same in code.
+        dataDirEnv:
+          process.env.DATA_DIR === undefined
+            ? "(not set)"
+            : process.env.DATA_DIR.trim() === ""
+              ? "(set, but empty — ignored)"
+              : process.env.DATA_DIR,
         dataDirWritable: writable,
         nodeEnv: process.env.NODE_ENV,
         cwd: process.cwd(),

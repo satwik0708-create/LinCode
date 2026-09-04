@@ -2,6 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { DATA_DIR } from "./store";
 
 /**
  * Binary storage for uploaded documents.
@@ -11,7 +12,10 @@ import path from "node:path";
  * name is metadata, never a path. Swapping this for an object store means
  * reimplementing these three functions and nothing else.
  */
-const UPLOAD_DIR = path.join(path.resolve(process.cwd(), process.env.DATA_DIR || ".data"), "uploads");
+// Shares the store's resolved directory rather than repeating the rule: two
+// copies of "where does data live" is exactly how uploads end up somewhere the
+// database is not.
+const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 
 /** Every type a student may attach as evidence, and the magic bytes it must start with. */
 export const ALLOWED_UPLOAD_TYPES: Record<string, { extension: string; magic: number[][] }> = {

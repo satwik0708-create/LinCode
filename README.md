@@ -72,17 +72,16 @@ because that is the one case where none of those can be relied on.
 
 ### Deploying to a serverless host (Vercel, Netlify)
 
-The datastore is a JSON file, so it needs somewhere writable. On a serverless host
-that is only `/tmp`. Set both of these as environment variables:
+One variable is required:
 
 | Variable | Value |
 | --- | --- |
 | `SESSION_SECRET` | 32+ random characters (see above) |
-| `DATA_DIR` | `/tmp` |
 
-Without `DATA_DIR` the first request that touches the store cannot write, and sign-in
-and sign-up return 500. Without `SESSION_SECRET` no session can be signed, so sign-in
-fails the same way.
+Storage needs no configuration. A serverless host mounts the deployment read-only and
+gives exactly one writable location, so the app detects the platform and uses `/tmp`
+by default. `DATA_DIR` still overrides that if you want it somewhere specific — but an
+empty value is ignored rather than silently falling back to a read-only path.
 
 **`GET /api/health` reports both.** Open it on the deployment and it says which of the
 two is wrong, whether the datastore directory is actually writable, and what `DATA_DIR`

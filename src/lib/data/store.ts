@@ -65,7 +65,35 @@ export function emptyDatabase(): Database {
   };
 }
 
-const DATA_DIR = path.resolve(process.cwd(), process.env.DATA_DIR || ".data");
+/**
+ * Where the datastore lives.
+ *
+ * DATA_DIR wins when it is set to something usable — note the trim, because an
+ * environment variable created with an empty or whitespace value is a real and
+ * silent way to end up back on the default.
+ *
+ * Otherwise the default depends on where this is running. A serverless host
+ * mounts the deployment read-only and gives exactly one writable location, so
+ * writing next to the app there is guaranteed to fail; /tmp is the only answer
+ * and the platform tells us when we are on one. Making that automatic means a
+ * serverless deployment needs no storage configuration at all — the setting
+ * that is easiest to get wrong stops being required.
+ *
+ * /tmp is per-instance and cleared on cold start, so this makes a deployment
+ * work, not persist. Data that must survive needs a persistent disk or the
+ * database SECURITY.md describes.
+ */
+function resolveDataDir(): string {
+  const configured = process.env.DATA_DIR?.trim();
+  if (configured) return configured;
+
+  const serverless = Boolean(
+    process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY,
+  );
+  return serverless ? "/tmp/lincode" : ".data";
+}
+
+export const DATA_DIR = path.resolve(process.cwd(), resolveDataDir());
 const DB_FILE = path.join(DATA_DIR, "db.json");
 
 type Cache = {
