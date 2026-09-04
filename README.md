@@ -70,6 +70,26 @@ and offers a retry. `app/global-error.tsx` catches a failure in the root layout 
 and is deliberately self-contained — no providers, no design system, its own styles —
 because that is the one case where none of those can be relied on.
 
+### Deploying to a serverless host (Vercel, Netlify)
+
+The datastore is a JSON file, so it needs somewhere writable. On a serverless host
+that is only `/tmp`. Set both of these as environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `SESSION_SECRET` | 32+ random characters (see above) |
+| `DATA_DIR` | `/tmp` |
+
+Without `DATA_DIR` the first request that touches the store cannot write, and sign-in
+and sign-up return 500. Without `SESSION_SECRET` the server refuses to start at all.
+
+**`/tmp` is a demo measure, not a deployment.** It is per-instance and cleared on cold
+start, so an account created on one request may be gone on the next — and seeded demo
+accounts are recreated fresh each time an instance wakes. That is fine for showing the
+product and wrong for anything else. Data that has to survive needs a host with a
+persistent disk (Render, Railway, Fly.io — no code change, `DATA_DIR` unset) or the real
+database `SECURITY.md` describes.
+
 ### Signing up live in a demo
 
 Sign-up starts by asking *which role you are joining as* — Student, Faculty, Recruiter or

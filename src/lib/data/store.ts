@@ -90,16 +90,51 @@ async function loadFromDisk(): Promise<Database> {
     if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
     const { buildSeedDatabase } = await import("./seed");
     const seeded = await buildSeedDatabase();
-    await persist(seeded);
+
+    // Caching the seed to disk is an optimisation, not a requirement. On a
+    // read-only filesystem it fails, and failing the *read* over it would take
+    // the whole app down — including sign-in, which needs no write at all.
+    // Better to serve from memory and let writes be the thing that complains.
+    try {
+      await persist(seeded);
+    } catch (writeError) {
+      console.warn(
+        `[lincode] seeded in memory; could not cache to ${DB_FILE}: ${describeWriteFailure(writeError)}`,
+      );
+    }
     return seeded;
   }
 }
 
+/**
+ * A write failure on a read-only or unwritable filesystem is a deployment
+ * problem, not a code one, and `EROFS` alone does not say so. Serverless hosts
+ * are the common case: on Vercel nothing outside /tmp is writable.
+ */
+function describeWriteFailure(error: unknown): string {
+  const code = (error as NodeJS.ErrnoException)?.code;
+  if (code === "EROFS" || code === "EACCES" || code === "EPERM") {
+    return (
+      `${code}: ${DATA_DIR} is not writable. On a serverless host (Vercel, Netlify, Lambda) ` +
+      "only /tmp is — set DATA_DIR=/tmp. Note that /tmp is per-instance and cleared on cold " +
+      "start, so anything written there is temporary; a persistent disk or a real database is " +
+      "what this needs to keep data."
+    );
+  }
+  return String((error as Error)?.message ?? error);
+}
+
 async function persist(db: Database): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true, mode: 0o700 });
-  const tmp = `${DB_FILE}.${process.pid}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(db, null, 2), { mode: 0o600 });
-  await fs.rename(tmp, DB_FILE);
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true, mode: 0o700 });
+    const tmp = `${DB_FILE}.${process.pid}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(db, null, 2), { mode: 0o600 });
+    await fs.rename(tmp, DB_FILE);
+  } catch (error) {
+    // Rethrown with the cause spelled out: a mutation genuinely cannot succeed
+    // if it cannot be stored, so this must still fail — just legibly.
+    throw new Error(`Could not write the datastore. ${describeWriteFailure(error)}`);
+  }
 }
 
 /** Read-only snapshot. Callers must not mutate the result — use `mutate` for that. */
