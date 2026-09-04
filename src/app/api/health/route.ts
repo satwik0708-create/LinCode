@@ -62,10 +62,18 @@ export async function GET() {
         dataDirWritable: writable,
         nodeEnv: process.env.NODE_ENV,
         cwd: process.cwd(),
+        // Which Vercel environment is actually serving this. A URL produced by
+        // a git push is a Preview deployment, and a variable ticked only for
+        // Production does not exist there — the commonest reason a variable
+        // looks set in the dashboard yet reads as missing here.
+        vercelEnv: process.env.VERCEL_ENV ?? "(not on Vercel)",
+        deployment: process.env.VERCEL_URL ?? "(not on Vercel)",
+        commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "(unknown)",
       },
       note:
-        "Environment variables only take effect on a new deployment. After changing them in " +
-        "Vercel, redeploy — and make sure the Production environment is ticked, not only Development.",
+        `This is the "${process.env.VERCEL_ENV ?? "local"}" environment. A variable must be ticked ` +
+        "for the environment serving this URL — a git-push URL is Preview, not Production — and " +
+        "environment changes only apply to a NEW deployment, so redeploy after editing them.",
     },
     { status: problems.length === 0 ? 200 : 503, headers: { "Cache-Control": "no-store" } },
   );
