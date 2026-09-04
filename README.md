@@ -81,7 +81,13 @@ that is only `/tmp`. Set both of these as environment variables:
 | `DATA_DIR` | `/tmp` |
 
 Without `DATA_DIR` the first request that touches the store cannot write, and sign-in
-and sign-up return 500. Without `SESSION_SECRET` the server refuses to start at all.
+and sign-up return 500. Without `SESSION_SECRET` no session can be signed, so sign-in
+fails the same way.
+
+**`GET /api/health` reports both.** Open it on the deployment and it says which of the
+two is wrong, whether the datastore directory is actually writable, and what `DATA_DIR`
+resolved to. It returns 200 when the deployment is sound and 503 with a list of problems
+when it is not. It never exposes the secret — only whether one is set and long enough.
 
 **`/tmp` is a demo measure, not a deployment.** It is per-instance and cleared on cold
 start, so an account created on one request may be gone on the next — and seeded demo

@@ -23,10 +23,19 @@ export async function register() {
   const generate = `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`;
 
   if (production) {
-    // Fail closed and fail now. A weak signing key is a full auth bypass, so
-    // there is no version of this the server should start and serve. Throwing
-    // here leaves Next.js up and answering 500 to everything, which reads like
-    // a different bug; exiting says plainly that the server did not start.
+    // On a long-running server, exiting is the clearest possible signal: the
+    // operator is watching a terminal and sees the server refuse to start.
+    //
+    // On a serverless host it is the opposite. Killing the invocation turns a
+    // configuration mistake into a platform 500 with no message anywhere the
+    // operator can reach — including /api/health, which exists precisely to
+    // report this. There, log it and let the request through: auth still fails
+    // closed, because signing a session without the key is impossible, but the
+    // reason becomes visible instead of vanishing with the process.
+    const serverless = Boolean(
+      process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY,
+    );
+
     console.error(
       [
         "",
@@ -43,9 +52,11 @@ export async function register() {
         "  `npm run dev` works without this. A production build does not:",
         "  sessions are signed with it, so every sign-in would fail.",
         "",
+        serverless ? "  Open /api/health on the deployment for the current status." : "",
       ].join("\n"),
     );
-    process.exit(1);
+    if (!serverless) process.exit(1);
+    return;
   }
 
   // Development: say it once, plainly, and carry on with the fallback key.
